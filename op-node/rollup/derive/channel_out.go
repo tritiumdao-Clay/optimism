@@ -16,6 +16,7 @@ import (
 var ErrMaxFrameSizeTooSmall = errors.New("maxSize is too small to fit the fixed frame overhead")
 var ErrNotDepositTx = errors.New("first transaction in block is not a deposit tx")
 var ErrTooManyRLPBytes = errors.New("batch would cause RLP bytes to go over limit")
+var ErrChannelOutAlreadyClosed = errors.New("channel-out already closed")
 
 // FrameV0OverHeadSize is the absolute minimum size of a frame.
 // This is the fixed overhead frame size, calculated as specified
@@ -96,7 +97,7 @@ func (co *ChannelOut) Reset() error {
 // should be closed and a new one should be made.
 func (co *ChannelOut) AddBlock(block *types.Block) (uint64, error) {
 	if co.closed {
-		return 0, errors.New("already closed")
+		return 0, ErrChannelOutAlreadyClosed
 	}
 
 	batch, _, err := BlockToBatch(block)
@@ -116,7 +117,7 @@ func (co *ChannelOut) AddBlock(block *types.Block) (uint64, error) {
 // the batch data with AddBlock.
 func (co *ChannelOut) AddBatch(batch *BatchData) (uint64, error) {
 	if co.closed {
-		return 0, errors.New("already closed")
+		return 0, ErrChannelOutAlreadyClosed
 	}
 
 	// We encode to a temporary buffer to determine the encoded length to
@@ -160,7 +161,7 @@ func (co *ChannelOut) FullErr() error {
 
 func (co *ChannelOut) Close() error {
 	if co.closed {
-		return errors.New("already closed")
+		return ErrChannelOutAlreadyClosed
 	}
 	co.closed = true
 	return co.compress.Close()

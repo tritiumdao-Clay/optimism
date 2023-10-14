@@ -213,7 +213,7 @@ func TestChannelManagerCloseBeforeFirstUse(t *testing.T) {
 
 	a, _ := derivetest.RandomL2Block(rng, 4)
 
-	m.Close()
+	require.NoError(m.Close(), "Expected to close channel manager gracefully")
 
 	err := m.AddL2Block(a)
 	require.NoError(err, "Failed to add L2 block")
@@ -252,7 +252,7 @@ func TestChannelManagerCloseNoPendingChannel(t *testing.T) {
 	_, err = m.TxData(eth.BlockID{})
 	require.ErrorIs(err, io.EOF, "Expected channel manager to EOF")
 
-	m.Close()
+	require.NoError(m.Close(), "Expected to close channel manager gracefully")
 
 	err = m.AddL2Block(b)
 	require.NoError(err, "Failed to add L2 block")
@@ -286,13 +286,15 @@ func TestChannelManagerClosePendingChannel(t *testing.T) {
 
 	txdata, err := m.TxData(eth.BlockID{})
 	require.NoError(err, "Expected channel manager to produce valid tx data")
+	log.Info("generated first tx data", "len", txdata.Len())
 
 	m.TxConfirmed(txdata.ID(), eth.BlockID{})
 
-	m.Close()
+	require.ErrorIs(m.Close(), ErrPendingAfterClose, "Expected channel manager to error on close because of pending tx data")
 
 	txdata, err = m.TxData(eth.BlockID{})
 	require.NoError(err, "Expected channel manager to produce tx data from remaining L2 block data")
+	log.Info("generated more tx data", "len", txdata.Len())
 
 	m.TxConfirmed(txdata.ID(), eth.BlockID{})
 
@@ -340,7 +342,7 @@ func TestChannelManagerCloseAllTxsFailed(t *testing.T) {
 
 	m.TxFailed(txdata.ID())
 
-	m.Close()
+	require.NoError(m.Close(), "Expected to close channel manager gracefully")
 
 	_, err = m.TxData(eth.BlockID{})
 	require.ErrorIs(err, io.EOF, "Expected closed channel manager to produce no more tx data")
