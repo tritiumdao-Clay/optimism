@@ -5,6 +5,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"math/big"
 
 	"github.com/ethereum-optimism/optimism/op-node/rollup"
 	"github.com/ethereum-optimism/optimism/op-service/client"
@@ -12,6 +13,7 @@ import (
 	"github.com/ethereum-optimism/optimism/op-service/sources"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethdb/memorydb"
@@ -19,6 +21,45 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/trie"
 )
+
+func CalcBaseFee(parent eth.BlockInfo, elasticity uint64, preCanyon bool) *big.Int {
+	denomUint := uint64(250)
+	if preCanyon {
+		denomUint = uint64(50)
+	}
+	parentGasTarget := parent.GasLimit() / elasticity
+	// If the parent gasUsed is the same as the target, the baseFee remains unchanged.
+	if parent.GasUsed() == parentGasTarget {
+		return new(big.Int).Set(parent.BaseFee())
+	}
+
+	var (
+		num   = new(big.Int)
+		denom = new(big.Int)
+	)
+
+	if parent.GasUsed() > parentGasTarget {
+		// If the parent block used more gas than its target, the baseFee should increase.
+		// max(1, parentBaseFee * gasUsedDelta / parentGasTarget / baseFeeChangeDenominator)
+		num.SetUint64(parent.GasUsed() - parentGasTarget)
+		num.Mul(num, parent.BaseFee())
+		num.Div(num, denom.SetUint64(parentGasTarget))
+		num.Div(num, denom.SetUint64(denomUint))
+		baseFeeDelta := math.BigMax(num, common.Big1)
+
+		return num.Add(parent.BaseFee(), baseFeeDelta)
+	} else {
+		// Otherwise if the parent block used less gas than its target, the baseFee should decrease.
+		// max(0, parentBaseFee * gasUsedDelta / parentGasTarget / baseFeeChangeDenominator)
+		num.SetUint64(parentGasTarget - parent.GasUsed())
+		num.Mul(num, parent.BaseFee())
+		num.Div(num, denom.SetUint64(parentGasTarget))
+		num.Div(num, denom.SetUint64(denomUint))
+		baseFee := num.Sub(parent.BaseFee(), num)
+
+		return math.BigMax(baseFee, common.Big0)
+	}
+}
 
 func PreCanyonEncode(receipts types.Receipts) [][]byte {
 	for _, receipt := range receipts {
@@ -70,7 +111,7 @@ type ReceiptFetcher interface {
 	FetchReceipts(context.Context, common.Hash) (eth.BlockInfo, types.Receipts, error)
 }
 
-func ValidatePreCanyon(number uint64, client ReceiptFetcher) error {
+func ValidatePreCanyonReceipts(number uint64, client ReceiptFetcher) error {
 	block, err := client.InfoByNumber(context.Background(), number)
 	if err != nil {
 		return err
@@ -88,7 +129,25 @@ func ValidatePreCanyon(number uint64, client ReceiptFetcher) error {
 	return nil
 }
 
-func ValidatePostCanyon(number uint64, client ReceiptFetcher) error {
+func ValidatePreCanyon1559Params(number, elasticity uint64, client ReceiptFetcher) error {
+	block, err := client.InfoByNumber(context.Background(), number)
+	if err != nil {
+		return err
+	}
+	parent, err := client.InfoByNumber(context.Background(), number-1)
+	if err != nil {
+		return err
+	}
+
+	want := CalcBaseFee(parent, elasticity, true)
+	have := block.BaseFee()
+	if have.Cmp(want) != 0 {
+		return fmt.Errorf("BaseFee does not match. have: %v. want: %v", have, want)
+	}
+	return nil
+}
+
+func ValidatePostCanyonReceipts(number uint64, client ReceiptFetcher) error {
 	block, err := client.InfoByNumber(context.Background(), number)
 	if err != nil {
 		return err
@@ -106,19 +165,39 @@ func ValidatePostCanyon(number uint64, client ReceiptFetcher) error {
 	return nil
 }
 
+func ValidatePostCanyon1559Params(number, elasticity uint64, client ReceiptFetcher) error {
+	block, err := client.InfoByNumber(context.Background(), number)
+	if err != nil {
+		return err
+	}
+	parent, err := client.InfoByNumber(context.Background(), number-1)
+	if err != nil {
+		return err
+	}
+
+	want := CalcBaseFee(parent, elasticity, false)
+	have := block.BaseFee()
+	if have.Cmp(want) != 0 {
+		return fmt.Errorf("BaseFee does not match. have: %v. want: %v", have, want)
+	}
+	return nil
+}
+
 func main() {
 	logger := log.New()
 
 	// Define the flag variables
 	var (
-		preCanyon bool
-		number    uint64
-		rpcURL    string
+		preCanyon  bool
+		number     uint64
+		elasticity uint64
+		rpcURL     string
 	)
 
 	// Define and parse the command-line flags
 	flag.BoolVar(&preCanyon, "pre-canyon", false, "Set this flag to assert pre-canyon receipt hash behavior")
-	flag.Uint64Var(&number, "number", 0, "Specify a uint64 value for number")
+	flag.Uint64Var(&number, "number", 0, "block number to check")
+	flag.Uint64Var(&elasticity, "number", 6, "Specify the EIP-1559 elasticity. 6 on mainnet/sepolia. 10 on goerli")
 	flag.StringVar(&rpcURL, "rpc-url", "", "Specify the RPC URL as a string")
 
 	// Parse the command-line arguments
@@ -136,17 +215,31 @@ func main() {
 	}
 
 	if preCanyon {
-		if err := ValidatePreCanyon(number, client); err != nil {
+		if err := ValidatePreCanyonReceipts(number, client); err != nil {
 			log.Crit("Pre Canyon should succeed when expecting pre-canyon", "err", err)
 		}
-		if err := ValidatePostCanyon(number, client); err == nil {
+		if err := ValidatePostCanyonReceipts(number, client); err == nil {
+			log.Crit("Post Canyon should fail when expecting pre-canyon")
+		}
+
+		if err := ValidatePreCanyon1559Params(number, elasticity, client); err != nil {
+			log.Crit("Pre Canyon should succeed when expecting pre-canyon", "err", err)
+		}
+		if err := ValidatePostCanyon1559Params(number, elasticity, client); err == nil {
 			log.Crit("Post Canyon should fail when expecting pre-canyon")
 		}
 	} else {
-		if err := ValidatePostCanyon(number, client); err != nil {
+		if err := ValidatePostCanyonReceipts(number, client); err != nil {
 			log.Crit("Post Canyon should succeed when expecting post-canyon", "err", err)
 		}
-		if err := ValidatePreCanyon(number, client); err == nil {
+		if err := ValidatePreCanyonReceipts(number, client); err == nil {
+			log.Crit("Pre Canyon should fail when expecting post-canyon")
+		}
+
+		if err := ValidatePostCanyon1559Params(number, elasticity, client); err != nil {
+			log.Crit("Post Canyon should succeed when expecting post-canyon", "err", err)
+		}
+		if err := ValidatePreCanyon1559Params(number, elasticity, client); err == nil {
 			log.Crit("Pre Canyon should fail when expecting post-canyon")
 		}
 	}
