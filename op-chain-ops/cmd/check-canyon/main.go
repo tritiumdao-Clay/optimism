@@ -111,103 +111,74 @@ type ReceiptFetcher interface {
 	FetchReceipts(context.Context, common.Hash) (eth.BlockInfo, types.Receipts, error)
 }
 
-func ValidatePreCanyonReceipts(number uint64, client ReceiptFetcher) func() error {
-	return func() error {
-
-		block, err := client.InfoByNumber(context.Background(), number)
-		if err != nil {
-			return err
-		}
-		_, receipts, err := client.FetchReceipts(context.Background(), block.Hash())
-		if err != nil {
-			return err
-		}
-
-		have := block.ReceiptHash()
-		want := HashList(PreCanyonEncode(receipts))
-		if have != want {
-			return fmt.Errorf("Receipts do not look correct as pre-canyon. have: %v, want: %v", have, want)
-		}
-		return nil
-	}
+type Args struct {
+	Number     uint64
+	Elasticity uint64
+	Client     ReceiptFetcher
 }
 
-func ValidatePreCanyon1559Params(number, elasticity uint64, client ReceiptFetcher) func() error {
-	return func() error {
-
-		block, err := client.InfoByNumber(context.Background(), number)
-		if err != nil {
-			return err
-		}
-		parent, err := client.InfoByNumber(context.Background(), number-1)
-		if err != nil {
-			return err
-		}
-
-		want := CalcBaseFee(parent, elasticity, true)
-		have := block.BaseFee()
-		if have.Cmp(want) != 0 {
-			return fmt.Errorf("BaseFee does not match. have: %v. want: %v", have, want)
-		}
-		return nil
+func ValidateReceipts(ctx Args, preCanyon bool) error {
+	block, err := ctx.Client.InfoByNumber(context.Background(), ctx.Number)
+	if err != nil {
+		return err
 	}
+
+	_, receipts, err := ctx.Client.FetchReceipts(context.Background(), block.Hash())
+	if err != nil {
+		return err
+	}
+
+	have := block.ReceiptHash()
+	var want common.Hash
+
+	if preCanyon {
+		want = HashList(PreCanyonEncode(receipts))
+	} else {
+		want = HashList(PostCanyonEncode(receipts))
+	}
+
+	if have != want {
+		return fmt.Errorf("Receipts do not look correct. pre-canyon: %v. have: %v, want: %v", preCanyon, have, want)
+	}
+
+	return nil
 }
 
-func ValidatePostCanyonReceipts(number uint64, client ReceiptFetcher) func() error {
-	return func() error {
-
-		block, err := client.InfoByNumber(context.Background(), number)
-		if err != nil {
-			return err
-		}
-		_, receipts, err := client.FetchReceipts(context.Background(), block.Hash())
-		if err != nil {
-			return err
-		}
-
-		have := block.ReceiptHash()
-		want := HashList(PostCanyonEncode(receipts))
-		if have != want {
-			return fmt.Errorf("Receipts do not look correct as post-canyon. have: %v, want: %v", have, want)
-		}
-		return nil
+func Validate1559Params(ctx Args, preCanyon bool) error {
+	block, err := ctx.Client.InfoByNumber(context.Background(), ctx.Number)
+	if err != nil {
+		return err
 	}
+
+	parent, err := ctx.Client.InfoByNumber(context.Background(), ctx.Number-1)
+	if err != nil {
+		return err
+	}
+
+	want := CalcBaseFee(parent, ctx.Elasticity, preCanyon)
+	have := block.BaseFee()
+
+	if have.Cmp(want) != 0 {
+		return fmt.Errorf("BaseFee does not match. have: %v, want: %v", have, want)
+	}
+
+	return nil
 }
 
-func ValidatePostCanyon1559Params(number, elasticity uint64, client ReceiptFetcher) func() error {
-	return func() error {
-		block, err := client.InfoByNumber(context.Background(), number)
-		if err != nil {
-			return err
+func CheckActivation(f func(Args, bool) error, ctx Args, preCanyon bool) {
+	if preCanyon {
+		if err := f(ctx, true); err != nil {
+			log.Error("Pre-state was invalid when it was expected to be valid", "err", err)
 		}
-		parent, err := client.InfoByNumber(context.Background(), number-1)
-		if err != nil {
-			return err
-		}
-
-		want := CalcBaseFee(parent, elasticity, false)
-		have := block.BaseFee()
-		if have.Cmp(want) != 0 {
-			return fmt.Errorf("BaseFee does not match. have: %v. want: %v", have, want)
-		}
-		return nil
-	}
-}
-
-func ValidatePair(pre, post func() error, preValid bool) {
-	if preValid {
-		if err := pre(); err != nil {
-			log.Crit("Pre-state was invalid when it was expected to be valid", "err", err)
-		}
-		if err := post(); err == nil {
-			log.Crit("Post-state was valid when it was expected to be invalid")
+		if err := f(ctx, false); err == nil {
+			log.Error("Post-state was valid when it was expected to be invalid")
 		}
 	} else {
-		if err := pre(); err == nil {
-			log.Crit("Pre-state was valid when it was expected to be invalid")
+		if err := f(ctx, true); err == nil {
+			log.Error("Pre-state was valid when it was expected to be invalid")
 		}
-		if err := post(); err != nil {
-			log.Crit("Post-state was invalid when it was expected to be valid", "err", err)
+		if err := f(ctx, false); err != nil {
+			log.Error("Post-state was invalid when it was expected to be valid", "err", err)
 		}
 	}
 }
@@ -243,6 +214,12 @@ func main() {
 		log.Crit("Error creating RPC", "err", err)
 	}
 
-	ValidatePair(ValidatePreCanyonReceipts(number, client), ValidatePostCanyonReceipts(number, client), preCanyon)
-	ValidatePair(ValidatePreCanyon1559Params(number, elasticity, client), ValidatePostCanyon1559Params(number, elasticity, client), preCanyon)
+	ctx := Args{
+		Number:     number,
+		Elasticity: elasticity,
+		Client:     client,
+	}
+
+	CheckActivation(ValidateReceipts, ctx, preCanyon)
+	CheckActivation(Validate1559Params, ctx, preCanyon)
 }
