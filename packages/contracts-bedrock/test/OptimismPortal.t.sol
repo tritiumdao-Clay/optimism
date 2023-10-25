@@ -287,6 +287,8 @@ contract OptimismPortal_Test is Portal_Initializer {
 
     /// @dev Tests that `isOutputFinalized` succeeds for an EOA depositing a tx with ETH and data.
     function test_simple_isOutputFinalized_succeeds() external {
+        uint256 startingBlockNumber = deploy.cfg().l2OutputOracleStartingBlockNumber();
+
         uint256 ts = block.timestamp;
         vm.mockCall(
             address(op.L2_ORACLE()),
@@ -692,7 +694,7 @@ contract OptimismPortal_FinalizeWithdrawal_Test is Portal_Initializer {
     ///      has not yet passed.
     function test_finalizeWithdrawalTransaction_onRecentWithdrawal_reverts() external {
         // Setup the Oracle to return an output with a recent timestamp
-        uint256 recentTimestamp = block.timestamp - 1000;
+        uint256 recentTimestamp = block.timestamp - 1;
         vm.mockCall(
             address(op.L2_ORACLE()),
             abi.encodeWithSelector(L2OutputOracle.getL2Output.selector),
@@ -997,6 +999,8 @@ contract OptimismPortalResourceFuzz_Test is Portal_Initializer {
         vm.assume(((_maxResourceLimit / _elasticityMultiplier) * _elasticityMultiplier) == _maxResourceLimit);
         _prevBoughtGas = uint64(bound(_prevBoughtGas, 0, _maxResourceLimit - _gasLimit));
         _blockDiff = uint8(bound(_blockDiff, 0, 3));
+
+        vm.roll(uint256(keccak256(abi.encode(_blockDiff))) % uint256(type(uint16).max));
 
         // Create a resource config to mock the call to the system config with
         ResourceMetering.ResourceConfig memory rcfg = ResourceMetering.ResourceConfig({
