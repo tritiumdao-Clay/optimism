@@ -37,7 +37,7 @@ import { ResourceMetering } from "src/L1/ResourceMetering.sol";
 import { Constants } from "src/libraries/Constants.sol";
 import { Deploy } from "scripts/Deploy.s.sol";
 
-contract CommonTest is Test {
+contract CommonTest is Deploy, Test {
     address alice = address(128);
     address bob = address(256);
     address multisig = address(512);
@@ -56,7 +56,6 @@ contract CommonTest is Test {
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     FFIInterface ffi;
-    Deploy deploy;
 
     function setUp() public virtual {
         // Give alice and bob some ETH
@@ -78,9 +77,8 @@ contract CommonTest is Test {
         );
 
         ffi = new FFIInterface();
-        deploy = new Deploy();
-        deploy.setUp();
-        deploy.run();
+        //Deploy.setUp();
+        //Deploy.run();
     }
 
     function emitTransactionDeposited(
