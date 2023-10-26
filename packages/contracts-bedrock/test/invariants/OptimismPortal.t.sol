@@ -189,7 +189,8 @@ contract OptimismPortal_CannotFinalizeTwice is OptimismPortal_Invariant_Harness 
         // Set the target contract to the portal proxy
         targetContract(address(optimismPortal));
         // Exclude the proxy multisig from the senders so that the proxy cannot be upgraded
-        excludeSender(address(multisig));
+        address admin = address(uint160(uint256(vm.load(address(optimismPortal), Constants.PROXY_OWNER_ADDRESS))));
+        excludeSender(admin);
     }
 
     /// @custom:invariant `finalizeWithdrawalTransaction` should revert if the withdrawal
