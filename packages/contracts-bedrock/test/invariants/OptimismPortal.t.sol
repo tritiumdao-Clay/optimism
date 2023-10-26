@@ -158,8 +158,9 @@ contract OptimismPortal_CannotTimeTravel is OptimismPortal_Invariant_Harness {
 
         // Set the target contract to the portal proxy
         targetContract(address(optimismPortal));
-        // Exclude the proxy multisig from the senders so that the proxy cannot be upgraded
-        excludeSender(address(multisig));
+        // Exclude the proxy admin from the senders so that the proxy cannot be upgraded
+        address admin = address(uint160(uint256(vm.load(address(optimismPortal), Constants.PROXY_OWNER_ADDRESS))));
+        excludeSender(admin);
     }
 
     /// @custom:invariant `finalizeWithdrawalTransaction` should revert if the finalization
@@ -188,7 +189,7 @@ contract OptimismPortal_CannotFinalizeTwice is OptimismPortal_Invariant_Harness 
 
         // Set the target contract to the portal proxy
         targetContract(address(optimismPortal));
-        // Exclude the proxy multisig from the senders so that the proxy cannot be upgraded
+        // Exclude the proxy admin from the senders so that the proxy cannot be upgraded
         address admin = address(uint160(uint256(vm.load(address(optimismPortal), Constants.PROXY_OWNER_ADDRESS))));
         excludeSender(admin);
     }
@@ -216,8 +217,9 @@ contract OptimismPortal_CanAlwaysFinalizeAfterWindow is OptimismPortal_Invariant
 
         // Set the target contract to the portal proxy
         targetContract(address(optimismPortal));
-        // Exclude the proxy multisig from the senders so that the proxy cannot be upgraded
-        excludeSender(address(multisig));
+        // Exclude the proxy admin from the senders so that the proxy cannot be upgraded
+        address admin = address(uint160(uint256(vm.load(address(optimismPortal), Constants.PROXY_OWNER_ADDRESS))));
+        excludeSender(admin);
     }
 
     /// @custom:invariant A withdrawal should **always** be able to be finalized
