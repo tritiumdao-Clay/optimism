@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"sync"
+	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -22,8 +23,9 @@ func validateReceipts(block eth.BlockID, receiptHash common.Hash, txHashes []com
 	if len(receipts) != len(txHashes) {
 		return fmt.Errorf("got %d receipts but expected %d", len(receipts), len(txHashes))
 	}
+	constZeroHash := common.HexToHash("0000000000000000000000000000000000000000000000000000000000000000")
 	if len(txHashes) == 0 {
-		if receiptHash != types.EmptyRootHash {
+		if receiptHash != types.EmptyRootHash && receiptHash != constZeroHash {
 			return fmt.Errorf("no transactions, but got non-empty receipt trie root: %s", receiptHash)
 		}
 	}
@@ -82,7 +84,7 @@ func validateReceipts(block eth.BlockID, receiptHash common.Hash, txHashes []com
 	// or returning them out-of-order. Verify the receipts against the expected receipt-hash.
 	hasher := trie.NewStackTrie(nil)
 	computed := types.DeriveSha(types.Receipts(receipts), hasher)
-	if receiptHash != computed {
+	if receiptHash != computed && receiptHash != constZeroHash {
 		return fmt.Errorf("failed to fetch list of receipts: expected receipt root %s but computed %s from retrieved receipts", receiptHash, computed)
 	}
 	return nil
@@ -457,7 +459,8 @@ func (job *receiptsFetchingJob) runAltMethod(ctx context.Context, m ReceiptsFetc
 	case ParityGetBlockReceipts:
 		err = job.client.CallContext(ctx, &result, "parity_getBlockReceipts", job.block.Hash)
 	case EthGetBlockReceipts:
-		err = job.client.CallContext(ctx, &result, "eth_getBlockReceipts", job.block.Hash)
+		//err = job.client.CallContext(ctx, &result, "eth_getBlockReceipts", job.block.Hash)
+		err = job.client.CallContext(ctx, &result, "eth_getBlockReceipts",  strconv.Itoa(int(job.block.Number)))
 	case ErigonGetBlockReceiptsByBlockHash:
 		err = job.client.CallContext(ctx, &result, "erigon_getBlockReceiptsByBlockHash", job.block.Hash)
 	default:

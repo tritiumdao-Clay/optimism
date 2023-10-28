@@ -72,7 +72,8 @@ func (h headerInfo) MixDigest() common.Hash {
 }
 
 func (h headerInfo) BaseFee() *big.Int {
-	return h.Header.BaseFee
+	//return h.Header.BaseFee
+	return big.NewInt(0)
 }
 
 func (h headerInfo) ReceiptHash() common.Hash {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+        "strconv"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
@@ -30,6 +31,7 @@ var (
 
 type RuntimeCfgL1Source interface {
 	ReadStorageAt(ctx context.Context, address common.Address, storageSlot common.Hash, blockHash common.Hash) (common.Hash, error)
+        GetStorageAt(ctx context.Context, address common.Address, storageSlot common.Hash, blockTag string) (common.Hash, error)
 }
 
 type ReadonlyRuntimeConfig interface {
@@ -98,7 +100,8 @@ func (r *RuntimeConfig) RecommendedProtocolVersion() params.ProtocolVersion {
 // Load is safe to call concurrently, but will lock the runtime configuration modifications only,
 // and will thus not block other Load calls with possibly alternative L1 block views.
 func (r *RuntimeConfig) Load(ctx context.Context, l1Ref eth.L1BlockRef) error {
-	p2pSignerVal, err := r.l1Client.ReadStorageAt(ctx, r.rollupCfg.L1SystemConfigAddress, UnsafeBlockSignerAddressSystemConfigStorageSlot, l1Ref.Hash)
+	//p2pSignerVal, err := r.l1Client.ReadStorageAt(ctx, r.rollupCfg.L1SystemConfigAddress, UnsafeBlockSignerAddressSystemConfigStorageSlot, l1Ref.Hash)
+        p2pSignerVal, err := r.l1Client.GetStorageAt(ctx, r.rollupCfg.L1SystemConfigAddress, UnsafeBlockSignerAddressSystemConfigStorageSlot, strconv.Itoa(int(l1Ref.Number)))
 	if err != nil {
 		return fmt.Errorf("failed to fetch unsafe block signing address from system config: %w", err)
 	}
