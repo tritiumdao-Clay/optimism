@@ -293,27 +293,30 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 				Value            string `json:"value"`
 			}
 			type Block struct {
-				Difficulty       string        `json:"difficulty"`
-				ExtraData        string        `json:"extraData"`
-				GasLimit         string        `json:"gasLimit"`
-				GasUsed          string        `json:"gasUsed"`
-				Hash             string        `json:"hash"`
-				LogsBloom        string        `json:"logsBloom"`
-				Miner            string        `json:"miner"`
-				mixHash          string        `json:"mixHash"`
-				Nonce            string        `json:"nonce"`
-				Number           string        `json:"number"`
-				ParentHash       string        `json:"parentHash"`
-				ReceiptsRoot     string        `json:"receiptsRoot"`
-				Sha3Uncles       string        `json:"sha3Uncles"`
-				Size             string        `json:"size"`
-				StateRoot        string        `json:"stateRoot"`
-				Timestamp        string        `json:"timestamp"`
-				TotalDifficulty  string        `json:"totalDifficulty"`
-				Transactions     []Transaction `json:"transac"`
-				TransactionsRoot string        `json:"transactionsRoot"`
+				Difficulty      string `json:"difficulty"`
+				ExtraData       string `json:"extraData"`
+				GasLimit        string `json:"gasLimit"`
+				GasUsed         string `json:"gasUsed"`
+				Hash            string `json:"hash"`
+				LogsBloom       string `json:"logsBloom"`
+				Miner           string `json:"miner"`
+				mixHash         string `json:"mixHash"`
+				Nonce           string `json:"nonce"`
+				Number          string `json:"number"`
+				ParentHash      string `json:"parentHash"`
+				ReceiptsRoot    string `json:"receiptsRoot"`
+				Sha3Uncles      string `json:"sha3Uncles"`
+				Size            string `json:"size"`
+				StateRoot       string `json:"stateRoot"`
+				Timestamp       string `json:"timestamp"`
+				TotalDifficulty string `json:"totalDifficulty"`
+				//Transactions     []Transaction `json:"transactions"`
+				TransactionsRoot string `json:"transactionsRoot"`
 			}
 			var block2 Block
+			fmt.Println("debug----")
+			fmt.Println(bodyText)
+			fmt.Println("debug----")
 			err = json.Unmarshal(bodyText, &block2)
 			if err != nil {
 				return nil, nil, err
@@ -323,7 +326,9 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 			var tmpByte2 [8]byte
 			copy(tmpByte2[:], common.Hex2BytesFixed(block2.Nonce, 8))
 			var baseFee hexutil.Big
+			fmt.Println("debug0")
 			baseFee = hexutil.Big(*(hexutil.MustDecodeBig("0x0")))
+			fmt.Println("debug1")
 			block = &rpcBlock{
 				rpcHeader: rpcHeader{
 					ParentHash:  common.HexToHash(block2.ParentHash),
