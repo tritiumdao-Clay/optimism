@@ -368,34 +368,16 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 	} else {
 		info, txs, err = block.Info(s.trustRPC, s.mustBePostMerge)
 	}
-	/*
-		fmt.Println("debug-------")
-		fmt.Println(block.Hash)
-		for i := 0; i < txs.Len(); i++ {
-			tmp := txs[i]
-			fmt.Println("to:", tmp.To())
-			fmt.Println("hash:", tmp.Hash())
-			fmt.Println("value:", tmp.Value())
-			fmt.Println("data:", tmp.Data())
-			fmt.Println("gas:", tmp.Gas())
-			fmt.Println("gasPrice:", tmp.GasPrice())
-			fmt.Println("noce:", tmp.Nonce())
-			fmt.Println("chainId:", tmp.ChainId())
-			fmt.Println("cost:", tmp.Cost())
-			fmt.Println("sourceHash:", tmp.SourceHash())
-			fmt.Println("time:", tmp.Time())
-			fmt.Println("type:", tmp.Type())
-			fmt.Println("gastipCap:", tmp.GasTipCap())
-			fmt.Println("gasFeeCap:", tmp.GasFeeCap())
-		}
-		fmt.Println("debug-------")
-	*/
+	fmt.Println("debugC5")
 	if err != nil {
+		fmt.Println("debugC6")
 		return nil, nil, err
 	}
+	fmt.Println("debugC7")
 	if err := id.CheckID(eth.ToBlockID(info)); err != nil {
 		return nil, nil, fmt.Errorf("fetched block data does not match requested ID: %w", err)
 	}
+	fmt.Println("debugC8")
 	s.headersCache.Add(info.Hash(), info)
 	s.transactionsCache.Add(info.Hash(), txs)
 	return info, txs, nil
