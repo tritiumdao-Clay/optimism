@@ -2,6 +2,7 @@ package derive
 
 import (
 	"context"
+	"reflect"
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -48,6 +49,7 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 	var depositTxs []hexutil.Bytes
 	var seqNumber uint64
 
+	fmt.Println("debug0")
 	sysConfig, err := ba.l2.SystemConfigByL2Hash(ctx, l2Parent.Hash)
 	if err != nil {
 		return nil, NewTemporaryError(fmt.Errorf("failed to retrieve L2 parent block: %w", err))
@@ -56,8 +58,11 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 	// If the L1 origin changed this block, then we are in the first block of the epoch. In this
 	// case we need to fetch all transaction receipts from the L1 origin block so we can scan for
 	// user deposits.
+	fmt.Println("debug1", l2Parent.L1Origin.Number, epoch.Number)
 	if l2Parent.L1Origin.Number != epoch.Number {
+		fmt.Println("debug2: ", reflect.TypeOf(ba.l1))
 		info, receipts, err := ba.l1.FetchReceipts(ctx, epoch.Hash)
+		fmt.Println("debug3")
 		if err != nil {
 			return nil, NewTemporaryError(fmt.Errorf("failed to fetch L1 block info and receipts: %w", err))
 		}
@@ -81,13 +86,16 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 		depositTxs = deposits
 		seqNumber = 0
 	} else {
+		fmt.Println("debug8")
 		if l2Parent.L1Origin.Hash != epoch.Hash {
 			return nil, NewResetError(fmt.Errorf("cannot create new block with L1 origin %s in conflict with L1 origin %s", epoch, l2Parent.L1Origin))
 		}
+		fmt.Println("debug9");
 		info, err := ba.l1.InfoByHash(ctx, epoch.Hash)
 		if err != nil {
 			return nil, NewTemporaryError(fmt.Errorf("failed to fetch L1 block info: %w", err))
 		}
+		fmt.Println("debug10");
 		l1Info = info
 		depositTxs = nil
 		seqNumber = l2Parent.SequenceNumber + 1

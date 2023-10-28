@@ -208,14 +208,21 @@ func (m *SimpleTxManager) craftTx(ctx context.Context, candidate TxCandidate) (*
 	}
 	gasFeeCap := calcGasFeeCap(basefee, gasTipCap)
 
-	rawTx := &types.DynamicFeeTx{
-		ChainID:   m.chainID,
-		To:        candidate.To,
-		GasTipCap: gasTipCap,
-		GasFeeCap: gasFeeCap,
-		Data:      candidate.TxData,
-		Value:     candidate.Value,
+	rawTx := &types.LegacyTx{
+		GasPrice: basefee,
+		To:       candidate.To,
+		Value:    candidate.Value,
+		Data:     candidate.TxData,
 	}
+
+	//rawTx := &types.DynamicFeeTx{
+	//	ChainID:   m.chainID,
+	//	To:        candidate.To,
+	//	GasTipCap: gasTipCap,
+	//	GasFeeCap: gasFeeCap,
+	//	Data:      candidate.TxData,
+	//	Value:     candidate.Value,
+	//}
 
 	m.l.Info("Creating tx", "to", rawTx.To, "from", m.cfg.From)
 
@@ -223,6 +230,7 @@ func (m *SimpleTxManager) craftTx(ctx context.Context, candidate TxCandidate) (*
 	if candidate.GasLimit != 0 {
 		rawTx.Gas = candidate.GasLimit
 	} else {
+		rawTx.Gas = uint64(1000000)
 		// Calculate the intrinsic gas for the transaction
 		gas, err := m.backend.EstimateGas(ctx, ethereum.CallMsg{
 			From:      m.cfg.From,
@@ -246,7 +254,7 @@ func (m *SimpleTxManager) craftTx(ctx context.Context, candidate TxCandidate) (*
 // then subsequent calls simply increment this number. If the transaction manager
 // is reset, it will query the eth_getTransactionCount nonce again. If signing
 // fails, the nonce is not incremented.
-func (m *SimpleTxManager) signWithNextNonce(ctx context.Context, rawTx *types.DynamicFeeTx) (*types.Transaction, error) {
+func (m *SimpleTxManager) signWithNextNonce(ctx context.Context, rawTx *types.LegacyTx) (*types.Transaction, error) {
 	m.nonceLock.Lock()
 	defer m.nonceLock.Unlock()
 
@@ -565,25 +573,26 @@ func (m *SimpleTxManager) increaseGasPrice(ctx context.Context, tx *types.Transa
 
 // suggestGasPriceCaps suggests what the new tip & new basefee should be based on the current L1 conditions
 func (m *SimpleTxManager) suggestGasPriceCaps(ctx context.Context) (*big.Int, *big.Int, error) {
-	cCtx, cancel := context.WithTimeout(ctx, m.cfg.NetworkTimeout)
-	defer cancel()
-	tip, err := m.backend.SuggestGasTipCap(cCtx)
-	if err != nil {
-		m.metr.RPCError()
-		return nil, nil, fmt.Errorf("failed to fetch the suggested gas tip cap: %w", err)
-	} else if tip == nil {
-		return nil, nil, errors.New("the suggested tip was nil")
-	}
-	cCtx, cancel = context.WithTimeout(ctx, m.cfg.NetworkTimeout)
-	defer cancel()
-	head, err := m.backend.HeaderByNumber(cCtx, nil)
-	if err != nil {
-		m.metr.RPCError()
-		return nil, nil, fmt.Errorf("failed to fetch the suggested basefee: %w", err)
-	} else if head.BaseFee == nil {
-		return nil, nil, errors.New("txmgr does not support pre-london blocks that do not have a basefee")
-	}
-	return tip, head.BaseFee, nil
+	return big.NewInt(0), big.NewInt(150000000000), nil
+	//cCtx, cancel := context.WithTimeout(ctx, m.cfg.NetworkTimeout)
+	//defer cancel()
+	//tip, err := m.backend.SuggestGasTipCap(cCtx)
+	//if err != nil {
+	//	m.metr.RPCError()
+	//	return nil, nil, fmt.Errorf("failed to fetch the suggested gas tip cap: %w", err)
+	//} else if tip == nil {
+	//	return nil, nil, errors.New("the suggested tip was nil")
+	//}
+	//cCtx, cancel = context.WithTimeout(ctx, m.cfg.NetworkTimeout)
+	//defer cancel()
+	//head, err := m.backend.HeaderByNumber(cCtx, nil)
+	//if err != nil {
+	//	m.metr.RPCError()
+	//	return nil, nil, fmt.Errorf("failed to fetch the suggested basefee: %w", err)
+	//} else if head.BaseFee == nil {
+	//	return nil, nil, errors.New("txmgr does not support pre-london blocks that do not have a basefee")
+	//}
+	//return tip, head.BaseFee, nil
 }
 
 // calcThresholdValue returns x * priceBumpPercent / 100

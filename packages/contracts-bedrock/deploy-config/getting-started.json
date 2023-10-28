@@ -1,10 +1,10 @@
 {
-  "finalSystemOwner": "ADMIN",
-  "portalGuardian": "ADMIN",
+  "finalSystemOwner": "0xDC956e4C85489eCE12174B9BD477fE133d835558",
+  "portalGuardian": "0xDC956e4C85489eCE12174B9BD477fE133d835558",
 
-  "l1StartingBlockTag": "BLOCKHASH",
+  "l1StartingBlockTag": "0xd52dad32f00127ce3c9566fc0603d9ae8682a0cab2a377f4e325793b3f6bd70f",
 
-  "l1ChainID": 5,
+  "l1ChainID": 15557,
   "l2ChainID": 42069,
   "l2BlockTime": 2,
   "l1BlockTime": 12,
@@ -13,23 +13,23 @@
   "sequencerWindowSize": 3600,
   "channelTimeout": 300,
 
-  "p2pSequencerAddress": "SEQUENCER",
+  "p2pSequencerAddress": "0x19c67E827303a103013BEa08D2A67E0DD17bbC59",
   "batchInboxAddress": "0xff00000000000000000000000000000000042069",
-  "batchSenderAddress": "BATCHER",
+  "batchSenderAddress": "0x17F42C02Ca0094f53e813A0F3e0ACfBf22b732Ef",
 
   "l2OutputOracleSubmissionInterval": 120,
   "l2OutputOracleStartingBlockNumber": 0,
-  "l2OutputOracleStartingTimestamp": TIMESTAMP,
+  "l2OutputOracleStartingTimestamp": 1698459422,
 
-  "l2OutputOracleProposer": "PROPOSER",
-  "l2OutputOracleChallenger": "ADMIN",
+  "l2OutputOracleProposer": "0x79A9b0d67f0986f3a13B950a4E24CaBe9aAE2222",
+  "l2OutputOracleChallenger": "0xDC956e4C85489eCE12174B9BD477fE133d835558",
 
   "finalizationPeriodSeconds": 12,
 
-  "proxyAdminOwner": "ADMIN",
-  "baseFeeVaultRecipient": "ADMIN",
-  "l1FeeVaultRecipient": "ADMIN",
-  "sequencerFeeVaultRecipient": "ADMIN",
+  "proxyAdminOwner": "0xDC956e4C85489eCE12174B9BD477fE133d835558",
+  "baseFeeVaultRecipient": "0xDC956e4C85489eCE12174B9BD477fE133d835558",
+  "l1FeeVaultRecipient": "0xDC956e4C85489eCE12174B9BD477fE133d835558",
+  "sequencerFeeVaultRecipient": "0xDC956e4C85489eCE12174B9BD477fE133d835558",
 
   "baseFeeVaultMinimumWithdrawalAmount": "0x8ac7230489e80000",
   "l1FeeVaultMinimumWithdrawalAmount": "0x8ac7230489e80000",
@@ -44,7 +44,7 @@
   "enableGovernance": true,
   "governanceTokenSymbol": "OP",
   "governanceTokenName": "Optimism",
-  "governanceTokenOwner": "ADMIN",
+  "governanceTokenOwner": "0xDC956e4C85489eCE12174B9BD477fE133d835558",
 
   "l2GenesisBlockGasLimit": "0x1c9c380",
   "l2GenesisBlockBaseFeePerGas": "0x3b9aca00",
