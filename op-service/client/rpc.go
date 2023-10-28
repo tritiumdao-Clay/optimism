@@ -167,7 +167,18 @@ func (b *BaseRPCClient) CallContext(ctx context.Context, result any, method stri
 	cCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	fmt.Println("debugBaseRPCClient", method, args)
-	return b.c.CallContext(cCtx, result, method, args...)
+	{
+		err := b.c.CallContext(cCtx, result, method, args...)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		if result != nil {
+			fmt.Println(result)
+		} else {
+			fmt.Println("debug---")
+		}
+	}
+	//return b.c.CallContext(cCtx, result, method, args...)
 }
 
 func (b *BaseRPCClient) BatchCallContext(ctx context.Context, batch []rpc.BatchElem) error {
