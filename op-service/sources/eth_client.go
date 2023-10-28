@@ -250,6 +250,8 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 	err := s.client.CallContext(ctx, &block, method, id.Arg(), true)
 	fmt.Println("debugC3")
 	if err != nil {
+		fmt.Println("debugC3333333", err.Error())
+		err = nil
 		if method == "eth_getBlockByHash" && err.Error() == string("invalid transaction v, r, s values") {
 			flag = true
 			client := &http.Client{}
@@ -277,21 +279,6 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 				return nil, nil, err
 			}
 
-			type Transaction struct {
-				BlockHash        string `json:"blockhash"`
-				BlockNumber      string `json:"blockNumber"`
-				ChainId          string `json:"chainId"`
-				From             string `json:"from"`
-				Gas              string `json:"gas"`
-				GasPrice         string `json:"gasPrice"`
-				Hash             string `json:"hash"`
-				Input            string `json:"input"`
-				Nonce            string `json:"nonce"`
-				To               string `json:"to"`
-				TransactionIndex string `json:"transactionIndex"`
-				Type             string `json:"type"`
-				Value            string `json:"value"`
-			}
 			type Block struct {
 				Difficulty      string `json:"difficulty"`
 				ExtraData       string `json:"extraData"`
@@ -355,7 +342,6 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 				},
 			}
 		}
-		return nil, nil, err
 	}
 	fmt.Println("debugC4")
 	if block == nil {
@@ -379,7 +365,9 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 	}
 	fmt.Println("debugC8")
 	s.headersCache.Add(info.Hash(), info)
+	fmt.Println("debugC9")
 	s.transactionsCache.Add(info.Hash(), txs)
+	fmt.Println("debugC10")
 	return info, txs, nil
 }
 
