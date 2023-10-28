@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"sync"
 	"strconv"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -20,6 +20,7 @@ import (
 // Warning: contractAddress is not verified, since it is a more expensive operation for data we do not use.
 // See go-ethereum/crypto.CreateAddress to verify contract deployment address data based on sender and tx nonce.
 func validateReceipts(block eth.BlockID, receiptHash common.Hash, txHashes []common.Hash, receipts []*types.Receipt) error {
+	fmt.Println("debugB")
 	if len(receipts) != len(txHashes) {
 		return fmt.Errorf("got %d receipts but expected %d", len(receipts), len(txHashes))
 	}
@@ -87,6 +88,7 @@ func validateReceipts(block eth.BlockID, receiptHash common.Hash, txHashes []com
 	if receiptHash != computed && receiptHash != constZeroHash {
 		return fmt.Errorf("failed to fetch list of receipts: expected receipt root %s but computed %s from retrieved receipts", receiptHash, computed)
 	}
+	fmt.Println("debugB0")
 	return nil
 }
 
@@ -460,7 +462,7 @@ func (job *receiptsFetchingJob) runAltMethod(ctx context.Context, m ReceiptsFetc
 		err = job.client.CallContext(ctx, &result, "parity_getBlockReceipts", job.block.Hash)
 	case EthGetBlockReceipts:
 		//err = job.client.CallContext(ctx, &result, "eth_getBlockReceipts", job.block.Hash)
-		err = job.client.CallContext(ctx, &result, "eth_getBlockReceipts",  strconv.Itoa(int(job.block.Number)))
+		err = job.client.CallContext(ctx, &result, "eth_getBlockReceipts", strconv.Itoa(int(job.block.Number)))
 	case ErigonGetBlockReceiptsByBlockHash:
 		err = job.client.CallContext(ctx, &result, "erigon_getBlockReceiptsByBlockHash", job.block.Hash)
 	default:
@@ -484,6 +486,7 @@ func (job *receiptsFetchingJob) runAltMethod(ctx context.Context, m ReceiptsFetc
 // The job caches the result, so repeated Fetches add no additional cost.
 // Fetch is safe to be called concurrently, and will lock to avoid duplicate work or internal inconsistency.
 func (job *receiptsFetchingJob) Fetch(ctx context.Context) (types.Receipts, error) {
+	fmt.Println("debugB0")
 	job.m.Lock()
 	defer job.m.Unlock()
 

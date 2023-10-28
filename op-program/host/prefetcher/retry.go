@@ -48,6 +48,7 @@ func (s *RetryingL1Source) InfoAndTxsByHash(ctx context.Context, blockHash commo
 }
 
 func (s *RetryingL1Source) FetchReceipts(ctx context.Context, blockHash common.Hash) (eth.BlockInfo, types.Receipts, error) {
+	s.logger.Info("debug:", blockHash)
 	return retry.Do2(ctx, maxAttempts, s.strategy, func() (eth.BlockInfo, types.Receipts, error) {
 		i, r, err := s.source.FetchReceipts(ctx, blockHash)
 		if err != nil {
