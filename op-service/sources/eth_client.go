@@ -12,8 +12,10 @@ package sources
 import (
 	"context"
 	"fmt"
-	"github.com/ethereum/go-ethereum/ethclient"
+	"io"
 	"math/big"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum"
@@ -248,16 +250,29 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 	if err != nil {
 		fmt.Println("debugC3", err.Error())
 
-		client, err := ethclient.Dial("https://api.testnet.evm.eosnetwork.com")
-		blockHash := fmt.Sprint(id.Arg())
-		fmt.Println("debugC3", blockHash)
-		block2, err := client.BlockByHash(ctx, common.HexToHash(blockHash))
+		client := &http.Client{}
+		var data = strings.NewReader(`{"jsonrpc":"2.0","method":"eth_getBlockByHash","params":["0xb043578589a4bc071e2f9a9537afabd32b4bb16a20fdcbbd65b5e29c65472f39", true],"id":67}`)
+		req, err := http.NewRequest("POST", "https://api.testnet.evm.eosnetwork.com", data)
 		if err != nil {
-			fmt.Println("debugC3", err.Error())
+			fmt.Println("debug1", err.Error())
 			return nil, nil, err
 		}
-		fmt.Println("debugC3", block2.Hash, block2.Number)
-		fmt.Println("debugC3", block2.Transactions())
+		req.Header.Set("Content-Type", "application/json")
+		resp, err := client.Do(req)
+		if err != nil {
+			fmt.Println("debug2", err.Error())
+			return nil, nil, err
+		}
+		defer resp.Body.Close()
+		bodyText, err := io.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println("debug3", err.Error())
+			return nil, nil, err
+		}
+		fmt.Println("debug------")
+		fmt.Printf("%s\n", bodyText)
+		fmt.Println("debug------")
+
 		return nil, nil, err
 	}
 	fmt.Println("debugC4")
