@@ -246,6 +246,13 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 	fmt.Println("debugC3")
 	if err != nil {
 		fmt.Println("debugC3", err.Error())
+		var block2 *rpcBlock
+		err := s.client.CallContext(ctx, &block2, method, id.Arg(), true)
+		if err != nil {
+			fmt.Println("debugC3", err.Error())
+			return nil, nil, err
+		}
+		fmt.Println("debugC3", block2.Hash, block2.Number)
 		return nil, nil, err
 	}
 	fmt.Println("debugC4")
