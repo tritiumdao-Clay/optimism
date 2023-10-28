@@ -12,6 +12,7 @@ package sources
 import (
 	"context"
 	"fmt"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"math/big"
 	"time"
 
@@ -246,13 +247,17 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 	fmt.Println("debugC3")
 	if err != nil {
 		fmt.Println("debugC3", err.Error())
-		var block2 *rpcBlock
-		err := s.client.CallContext(ctx, &block2, method, id.Arg(), true)
+
+		client, err := ethclient.Dial("https://api.testnet.evm.eosnetwork.com")
+		blockHash := fmt.Sprint(id.Arg())
+		fmt.Println("debugC3", blockHash)
+		block2, err := client.BlockByHash(ctx, common.HexToHash(blockHash))
 		if err != nil {
 			fmt.Println("debugC3", err.Error())
 			return nil, nil, err
 		}
 		fmt.Println("debugC3", block2.Hash, block2.Number)
+		fmt.Println("debugC3", block2.Transactions())
 		return nil, nil, err
 	}
 	fmt.Println("debugC4")
