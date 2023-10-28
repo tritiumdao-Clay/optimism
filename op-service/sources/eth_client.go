@@ -313,42 +313,45 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 				//Transactions     []Transaction `json:"transactions"`
 				TransactionsRoot string `json:"transactionsRoot"`
 			}
-			var block2 Block
+			type JsonResp struct {
+				Result Block `json:"result"`
+			}
+			var jsonResp JsonResp
 			fmt.Println("debug----")
 			fmt.Println(string(bodyText))
 			fmt.Println("debug----")
-			err = json.Unmarshal(bodyText, &block2)
+			err = json.Unmarshal(bodyText, &jsonResp)
 			if err != nil {
 				return nil, nil, err
 			}
 			var tmpByte [256]byte
-			copy(tmpByte[:], common.Hex2BytesFixed(block2.LogsBloom, 256))
+			copy(tmpByte[:], common.Hex2BytesFixed(jsonResp.Result.LogsBloom, 256))
 			var tmpByte2 [8]byte
-			copy(tmpByte2[:], common.Hex2BytesFixed(block2.Nonce, 8))
+			copy(tmpByte2[:], common.Hex2BytesFixed(jsonResp.Result.Nonce, 8))
 			var baseFee hexutil.Big
 			baseFee = hexutil.Big(*(hexutil.MustDecodeBig("0x0")))
 			var difficulty hexutil.Big
-			fmt.Println("debug", block2.Difficulty)
-			difficulty = hexutil.Big(*(hexutil.MustDecodeBig(block2.Difficulty)))
+			fmt.Println("debug", jsonResp.Result.Difficulty)
+			difficulty = hexutil.Big(*(hexutil.MustDecodeBig(jsonResp.Result.Difficulty)))
 			block = &rpcBlock{
 				rpcHeader: rpcHeader{
-					ParentHash:  common.HexToHash(block2.ParentHash),
+					ParentHash:  common.HexToHash(jsonResp.Result.ParentHash),
 					UncleHash:   common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000"),
-					Coinbase:    common.HexToAddress(block2.Miner),
-					Root:        common.HexToHash(block2.StateRoot),
-					TxHash:      common.HexToHash(block2.TransactionsRoot),
-					ReceiptHash: common.HexToHash(block2.ReceiptsRoot),
+					Coinbase:    common.HexToAddress(jsonResp.Result.Miner),
+					Root:        common.HexToHash(jsonResp.Result.StateRoot),
+					TxHash:      common.HexToHash(jsonResp.Result.TransactionsRoot),
+					ReceiptHash: common.HexToHash(jsonResp.Result.ReceiptsRoot),
 					Bloom:       tmpByte,
 					Difficulty:  difficulty,
-					Number:      hexutil.Uint64(hexutil.MustDecodeUint64(block2.Number)),
-					GasLimit:    hexutil.Uint64(hexutil.MustDecodeUint64(block2.GasLimit)),
-					GasUsed:     hexutil.Uint64(hexutil.MustDecodeUint64(block2.GasUsed)),
-					Time:        hexutil.Uint64(hexutil.MustDecodeUint64(block2.Timestamp)),
-					Extra:       common.Hex2Bytes(block2.ExtraData),
-					MixDigest:   common.HexToHash(block2.mixHash),
+					Number:      hexutil.Uint64(hexutil.MustDecodeUint64(jsonResp.Result.Number)),
+					GasLimit:    hexutil.Uint64(hexutil.MustDecodeUint64(jsonResp.Result.GasLimit)),
+					GasUsed:     hexutil.Uint64(hexutil.MustDecodeUint64(jsonResp.Result.GasUsed)),
+					Time:        hexutil.Uint64(hexutil.MustDecodeUint64(jsonResp.Result.Timestamp)),
+					Extra:       common.Hex2Bytes(jsonResp.Result.ExtraData),
+					MixDigest:   common.HexToHash(jsonResp.Result.mixHash),
 					Nonce:       tmpByte2,
 					BaseFee:     &baseFee,
-					Hash:        common.HexToHash(block2.Hash),
+					Hash:        common.HexToHash(jsonResp.Result.Hash),
 				},
 			}
 		}
