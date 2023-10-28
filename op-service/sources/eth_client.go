@@ -241,10 +241,13 @@ func (s *EthClient) headerCall(ctx context.Context, method string, id rpcBlockID
 
 func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID) (eth.BlockInfo, types.Transactions, error) {
 	var block *rpcBlock
+	fmt.Println("debugC2", method, id.Arg())
 	err := s.client.CallContext(ctx, &block, method, id.Arg(), true)
+	fmt.Println("debugC3")
 	if err != nil {
 		return nil, nil, err
 	}
+	fmt.Println("debugC4")
 	if block == nil {
 		return nil, nil, ethereum.NotFound
 	}
@@ -308,11 +311,13 @@ func (s *EthClient) InfoByLabel(ctx context.Context, label eth.BlockLabel) (eth.
 }
 
 func (s *EthClient) InfoAndTxsByHash(ctx context.Context, hash common.Hash) (eth.BlockInfo, types.Transactions, error) {
+	fmt.Println("debugC", hash.String())
 	if header, ok := s.headersCache.Get(hash); ok {
 		if txs, ok := s.transactionsCache.Get(hash); ok {
 			return header, txs, nil
 		}
 	}
+	fmt.Println("debugC1", hash.String())
 	return s.blockCall(ctx, "eth_getBlockByHash", hashID(hash))
 }
 
