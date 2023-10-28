@@ -315,7 +315,7 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 			}
 			var block2 Block
 			fmt.Println("debug----")
-			fmt.Println(bodyText)
+			fmt.Println(string(bodyText))
 			fmt.Println("debug----")
 			err = json.Unmarshal(bodyText, &block2)
 			if err != nil {
