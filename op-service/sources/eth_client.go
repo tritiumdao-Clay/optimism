@@ -326,9 +326,10 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 			var tmpByte2 [8]byte
 			copy(tmpByte2[:], common.Hex2BytesFixed(block2.Nonce, 8))
 			var baseFee hexutil.Big
-			fmt.Println("debug0")
 			baseFee = hexutil.Big(*(hexutil.MustDecodeBig("0x0")))
-			fmt.Println("debug1")
+			var difficulty hexutil.Big
+			fmt.Println("debug", block2.Difficulty)
+			difficulty = hexutil.Big(*(hexutil.MustDecodeBig(block2.Difficulty)))
 			block = &rpcBlock{
 				rpcHeader: rpcHeader{
 					ParentHash:  common.HexToHash(block2.ParentHash),
@@ -338,7 +339,7 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 					TxHash:      common.HexToHash(block2.TransactionsRoot),
 					ReceiptHash: common.HexToHash(block2.ReceiptsRoot),
 					Bloom:       tmpByte,
-					Difficulty:  hexutil.Big(*(hexutil.MustDecodeBig(block2.Difficulty))),
+					Difficulty:  difficulty,
 					Number:      hexutil.Uint64(hexutil.MustDecodeUint64(block2.Number)),
 					GasLimit:    hexutil.Uint64(hexutil.MustDecodeUint64(block2.GasLimit)),
 					GasUsed:     hexutil.Uint64(hexutil.MustDecodeUint64(block2.GasUsed)),
