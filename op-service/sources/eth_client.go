@@ -347,25 +347,34 @@ func (s *EthClient) PayloadByLabel(ctx context.Context, label eth.BlockLabel) (*
 func (s *EthClient) FetchReceipts(ctx context.Context, blockHash common.Hash) (eth.BlockInfo, types.Receipts, error) {
 	fmt.Println("debug", blockHash)
 	info, txs, err := s.InfoAndTxsByHash(ctx, blockHash)
+	fmt.Println("debug1")
 	if err != nil {
 		return nil, nil, err
 	}
 	// Try to reuse the receipts fetcher because is caches the results of intermediate calls. This means
 	// that if just one of many calls fail, we only retry the failed call rather than all of the calls.
 	// The underlying fetcher uses the receipts hash to verify receipt integrity.
+	fmt.Println("debug2")
 	var job *receiptsFetchingJob
+	fmt.Println("debug3")
 	if v, ok := s.receiptsCache.Get(blockHash); ok {
+		fmt.Println("debug4")
 		job = v
 	} else {
+		fmt.Println("debug5")
 		txHashes := eth.TransactionsToHashes(txs)
+		fmt.Println("debug6")
 		job = NewReceiptsFetchingJob(s, s.client, s.maxBatchSize, eth.ToBlockID(info), info.ReceiptHash(), txHashes)
+		fmt.Println("debug7")
 		s.receiptsCache.Add(blockHash, job)
 	}
+	fmt.Println("debug8")
 	receipts, err := job.Fetch(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
 
+	fmt.Println("debug9")
 	return info, receipts, nil
 }
 
