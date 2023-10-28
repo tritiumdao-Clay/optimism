@@ -11,6 +11,7 @@ package sources
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math/big"
@@ -244,45 +245,142 @@ func (s *EthClient) headerCall(ctx context.Context, method string, id rpcBlockID
 
 func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID) (eth.BlockInfo, types.Transactions, error) {
 	var block *rpcBlock
+	var flag bool
 	fmt.Println("debugC2", method, id.Arg())
 	err := s.client.CallContext(ctx, &block, method, id.Arg(), true)
 	fmt.Println("debugC3")
 	if err != nil {
-		if err.Error() == string("invalid transaction v, r, s values") {
+		if method == "eth_getBlockByHash" && err.Error() == string("invalid transaction v, r, s values") {
+			flag = true
+			client := &http.Client{}
+			dataPrefix := `{"jsonrpc":"2.0","method":"eth_getBlockByHash","params":["`
+			dataSuffix := `", true],"id":67}`
+			hash := fmt.Sprint(id.Arg())
 
-		}
-		fmt.Println("debugC3", err.Error())
+			var data = strings.NewReader(dataPrefix + hash + dataSuffix)
+			req, err := http.NewRequest("POST", "https://api.testnet.evm.eosnetwork.com", data)
+			if err != nil {
+				fmt.Println("debug1", err.Error())
+				fmt.Println("debug1", data)
+				return nil, nil, err
+			}
+			req.Header.Set("Content-Type", "application/json")
+			resp, err := client.Do(req)
+			if err != nil {
+				fmt.Println("debug2", err.Error())
+				return nil, nil, err
+			}
+			defer resp.Body.Close()
+			bodyText, err := io.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Println("debug3", err.Error())
+				return nil, nil, err
+			}
 
-		client := &http.Client{}
-		var data = strings.NewReader(`{"jsonrpc":"2.0","method":"eth_getBlockByHash","params":["0x9e49b514d10409f5ec9386e8911b84ee278be8d27626ca1dbcfad6844b961147", true],"id":67}`)
-		req, err := http.NewRequest("POST", "https://api.testnet.evm.eosnetwork.com", data)
-		if err != nil {
-			fmt.Println("debug1", err.Error())
-			return nil, nil, err
+			type Transaction struct {
+				BlockHash        string `json:"blockhash"`
+				BlockNumber      string `json:"blockNumber"`
+				ChainId          string `json:"chainId"`
+				From             string `json:"from"`
+				Gas              string `json:"gas"`
+				GasPrice         string `json:"gasPrice"`
+				Hash             string `json:"hash"`
+				Input            string `json:"input"`
+				Nonce            string `json:"nonce"`
+				To               string `json:"to"`
+				TransactionIndex string `json:"transactionIndex"`
+				Type             string `json:"type"`
+				Value            string `json:"value"`
+			}
+			type Block struct {
+				Difficulty       string        `json:"difficulty"`
+				ExtraData        string        `json:"extraData"`
+				GasLimit         string        `json:"gasLimit"`
+				GasUsed          string        `json:"gasUsed"`
+				Hash             string        `json:"hash"`
+				LogsBloom        string        `json:"logsBloom"`
+				Miner            string        `json:"miner"`
+				mixHash          string        `json:"mixHash"`
+				Nonce            string        `json:"nonce"`
+				Number           string        `json:"number"`
+				ParentHash       string        `json:"parentHash"`
+				ReceiptsRoot     string        `json:"receiptsRoot"`
+				Sha3Uncles       string        `json:"sha3Uncles"`
+				Size             string        `json:"size"`
+				StateRoot        string        `json:"stateRoot"`
+				Timestamp        string        `json:"timestamp"`
+				TotalDifficulty  string        `json:"totalDifficulty"`
+				Transactions     []Transaction `json:"transac"`
+				TransactionsRoot string        `json:"transactionsRoot"`
+			}
+			var block2 Block
+			err = json.Unmarshal(bodyText, &block2)
+			if err != nil {
+				return nil, nil, err
+			}
+			var tmpByte [256]byte
+			copy(tmpByte[:], common.Hex2BytesFixed(block2.LogsBloom, 256))
+			var tmpByte2 [8]byte
+			copy(tmpByte2[:], common.Hex2BytesFixed(block2.Nonce, 8))
+			var baseFee hexutil.Big
+			baseFee = hexutil.Big(*(hexutil.MustDecodeBig("0x0")))
+			block = &rpcBlock{
+				rpcHeader: rpcHeader{
+					ParentHash:  common.HexToHash(block2.ParentHash),
+					UncleHash:   common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000"),
+					Coinbase:    common.HexToAddress(block2.Miner),
+					Root:        common.HexToHash(block2.StateRoot),
+					TxHash:      common.HexToHash(block2.TransactionsRoot),
+					ReceiptHash: common.HexToHash(block2.ReceiptsRoot),
+					Bloom:       tmpByte,
+					Difficulty:  hexutil.Big(*(hexutil.MustDecodeBig(block2.Difficulty))),
+					Number:      hexutil.Uint64(hexutil.MustDecodeUint64(block2.Number)),
+					GasLimit:    hexutil.Uint64(hexutil.MustDecodeUint64(block2.GasLimit)),
+					GasUsed:     hexutil.Uint64(hexutil.MustDecodeUint64(block2.GasUsed)),
+					Time:        hexutil.Uint64(hexutil.MustDecodeUint64(block2.Timestamp)),
+					Extra:       common.Hex2Bytes(block2.ExtraData),
+					MixDigest:   common.HexToHash(block2.mixHash),
+					Nonce:       tmpByte2,
+					BaseFee:     &baseFee,
+					Hash:        common.HexToHash(block2.Hash),
+				},
+			}
 		}
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := client.Do(req)
-		if err != nil {
-			fmt.Println("debug2", err.Error())
-			return nil, nil, err
-		}
-		defer resp.Body.Close()
-		bodyText, err := io.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Println("debug3", err.Error())
-			return nil, nil, err
-		}
-		fmt.Println("debug------")
-		fmt.Printf("%s\n", bodyText)
-		fmt.Println("debug------")
-
 		return nil, nil, err
 	}
 	fmt.Println("debugC4")
 	if block == nil {
 		return nil, nil, ethereum.NotFound
 	}
-	info, txs, err := block.Info(s.trustRPC, s.mustBePostMerge)
+	var info eth.BlockInfo
+	var txs types.Transactions
+	if flag {
+		info = &headerInfo{block.rpcHeader.Hash, block.rpcHeader.createGethHeader()}
+	} else {
+		info, txs, err = block.Info(s.trustRPC, s.mustBePostMerge)
+	}
+	/*
+		fmt.Println("debug-------")
+		fmt.Println(block.Hash)
+		for i := 0; i < txs.Len(); i++ {
+			tmp := txs[i]
+			fmt.Println("to:", tmp.To())
+			fmt.Println("hash:", tmp.Hash())
+			fmt.Println("value:", tmp.Value())
+			fmt.Println("data:", tmp.Data())
+			fmt.Println("gas:", tmp.Gas())
+			fmt.Println("gasPrice:", tmp.GasPrice())
+			fmt.Println("noce:", tmp.Nonce())
+			fmt.Println("chainId:", tmp.ChainId())
+			fmt.Println("cost:", tmp.Cost())
+			fmt.Println("sourceHash:", tmp.SourceHash())
+			fmt.Println("time:", tmp.Time())
+			fmt.Println("type:", tmp.Type())
+			fmt.Println("gastipCap:", tmp.GasTipCap())
+			fmt.Println("gasFeeCap:", tmp.GasFeeCap())
+		}
+		fmt.Println("debug-------")
+	*/
 	if err != nil {
 		return nil, nil, err
 	}
