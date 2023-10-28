@@ -248,10 +248,13 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 	err := s.client.CallContext(ctx, &block, method, id.Arg(), true)
 	fmt.Println("debugC3")
 	if err != nil {
+		if err.Error() == string("invalid transaction v, r, s values") {
+
+		}
 		fmt.Println("debugC3", err.Error())
 
 		client := &http.Client{}
-		var data = strings.NewReader(`{"jsonrpc":"2.0","method":"eth_getBlockByHash","params":["0xb043578589a4bc071e2f9a9537afabd32b4bb16a20fdcbbd65b5e29c65472f39", true],"id":67}`)
+		var data = strings.NewReader(`{"jsonrpc":"2.0","method":"eth_getBlockByHash","params":["0x9e49b514d10409f5ec9386e8911b84ee278be8d27626ca1dbcfad6844b961147", true],"id":67}`)
 		req, err := http.NewRequest("POST", "https://api.testnet.evm.eosnetwork.com", data)
 		if err != nil {
 			fmt.Println("debug1", err.Error())
