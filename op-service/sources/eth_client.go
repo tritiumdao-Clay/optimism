@@ -251,7 +251,6 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 	fmt.Println("debugC3")
 	if err != nil {
 		fmt.Println("debugC3333333", err.Error())
-		err = nil
 		if method == "eth_getBlockByHash" && err.Error() == string("invalid transaction v, r, s values") {
 			flag = true
 			client := &http.Client{}
@@ -342,6 +341,7 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 				},
 			}
 		}
+		err = nil
 	}
 	fmt.Println("debugC4")
 	if block == nil {
