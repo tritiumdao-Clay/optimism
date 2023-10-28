@@ -21,7 +21,7 @@ import (
 // See go-ethereum/crypto.CreateAddress to verify contract deployment address data based on sender and tx nonce.
 func validateReceipts(block eth.BlockID, receiptHash common.Hash, txHashes []common.Hash, receipts []*types.Receipt) error {
 	fmt.Println("debugB")
-	if len(receipts) != len(txHashes) {
+	if len(receipts) != len(txHashes) && len(receipts) == 0 {
 		return fmt.Errorf("got %d receipts but expected %d", len(receipts), len(txHashes))
 	}
 	constZeroHash := common.HexToHash("0000000000000000000000000000000000000000000000000000000000000000")

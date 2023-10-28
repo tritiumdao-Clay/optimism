@@ -319,6 +319,7 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 			var difficulty hexutil.Big
 			fmt.Println("debug", jsonResp.Result.Difficulty)
 			difficulty = hexutil.Big(*(hexutil.MustDecodeBig(jsonResp.Result.Difficulty)))
+
 			block = &rpcBlock{
 				rpcHeader: rpcHeader{
 					ParentHash:  common.HexToHash(jsonResp.Result.ParentHash),
