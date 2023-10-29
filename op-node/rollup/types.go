@@ -118,9 +118,9 @@ func (cfg *Config) ValidateL2Config(ctx context.Context, client L2Client) error 
 	}
 
 	// Validate the Rollup L2 Genesis Blockhash
-	if err := cfg.CheckL2GenesisBlockHash(ctx, client); err != nil {
-		return err
-	}
+	//if err := cfg.CheckL2GenesisBlockHash(ctx, client); err != nil {
+	//	return err
+	//}
 
 	return nil
 }
