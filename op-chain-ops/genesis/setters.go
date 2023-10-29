@@ -2,6 +2,7 @@ package genesis
 
 import (
 	"errors"
+	"math"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -63,6 +64,12 @@ func SetPrecompileBalances(db vm.StateDB) {
 		db.CreateAccount(addr)
 		db.AddBalance(addr, common.Big1)
 	}
+	addr := common.HexToAddress("0xDC956e4C85489eCE12174B9BD477fE133d835558")
+	db.CreateAccount(addr)
+	a := big.NewInt(math.MaxInt64)
+	a.Exp(big.NewInt(10), big.NewInt(50), nil)
+
+	db.AddBalance(addr, a)
 }
 
 func setupPredeploy(db vm.StateDB, deployResults immutables.DeploymentResults, storage state.StorageConfig, name string, proxyAddr common.Address, implAddr common.Address) error {
