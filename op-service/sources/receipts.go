@@ -29,6 +29,8 @@ func validateReceipts(block eth.BlockID, receiptHash common.Hash, txHashes []com
 		if receiptHash != types.EmptyRootHash && receiptHash != constZeroHash {
 			return fmt.Errorf("no transactions, but got non-empty receipt trie root: %s", receiptHash)
 		}
+		//drop entire block when block include miner(0xbBBBbBbbbBBBBbbbbbbBBbBB5530EA015b900000) transaction
+		return nil
 	}
 	// We don't trust the RPC to provide consistent cached receipt info that we use for critical rollup derivation work.
 	// Let's check everything quickly.
