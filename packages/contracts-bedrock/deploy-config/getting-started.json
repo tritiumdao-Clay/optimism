@@ -6,7 +6,7 @@
 
   "l1ChainID": 15557,
   "l2ChainID": 42069,
-  "l2BlockTime": 10,
+  "l2BlockTime": 2,
   "l1BlockTime": 12,
 
   "maxSequencerDrift": 60000,
