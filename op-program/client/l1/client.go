@@ -73,9 +73,7 @@ func (o *OracleL1Client) InfoByHash(ctx context.Context, hash common.Hash) (eth.
 }
 
 func (o *OracleL1Client) FetchReceipts(ctx context.Context, blockHash common.Hash) (eth.BlockInfo, types.Receipts, error) {
-	fmt.Println("debugD1")
 	info, rcpts := o.oracle.ReceiptsByBlockHash(blockHash)
-	fmt.Println("debugD1")
 	return info, rcpts, nil
 }
 
