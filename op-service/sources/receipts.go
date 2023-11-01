@@ -509,6 +509,6 @@ func (job *receiptsFetchingJob) Fetch(ctx context.Context) (types.Receipts, erro
 		}
 	}
 
-	return job.result, nil
 	fmt.Println("debugB0:JOB_RESULT", len(job.result))
+	return job.result, nil
 }
