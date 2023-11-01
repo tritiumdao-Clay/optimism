@@ -60,8 +60,10 @@ func (aq *AttributesQueue) NextAttributes(ctx context.Context, l2SafeHead eth.L2
 
 	// Actually generate the next attributes
 	if attrs, err := aq.createNextAttributes(ctx, aq.batch, l2SafeHead); err != nil {
+		fmt.Println("debugC1:", err.Error())
 		return nil, err
 	} else {
+		fmt.Println("debugC1")
 		// Clear out the local state once we will succeed
 		aq.batch = nil
 		return attrs, nil
@@ -90,6 +92,12 @@ func (aq *AttributesQueue) createNextAttributes(ctx context.Context, batch *Batc
 	// we are verifying, not sequencing, we've got all transactions and do not pull from the tx-pool
 	// (that would make the block derivation non-deterministic)
 	attrs.NoTxPool = true
+	fmt.Println("debugC0", batch.Epoch().Hash, batch.Epoch().Number)
+	{
+		for i, item := range batch.Transactions {
+			fmt.Println("debugC0", i, item.String())
+		}
+	}
 	attrs.Transactions = append(attrs.Transactions, batch.Transactions...)
 
 	aq.log.Info("generated attributes in payload queue", "txs", len(attrs.Transactions), "timestamp", batch.Timestamp)

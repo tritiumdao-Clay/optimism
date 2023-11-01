@@ -246,11 +246,8 @@ func (s *EthClient) headerCall(ctx context.Context, method string, id rpcBlockID
 func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID) (eth.BlockInfo, types.Transactions, error) {
 	var block *rpcBlock
 	var flag bool
-	fmt.Println("debugC2", method, id.Arg())
 	err := s.client.CallContext(ctx, &block, method, id.Arg(), true)
-	fmt.Println("debugC3")
 	if err != nil {
-		fmt.Println("debugC3333333", err.Error())
 		if method == "eth_getBlockByHash" && err.Error() == string("invalid transaction v, r, s values") {
 			flag = true
 			client := &http.Client{}
@@ -261,20 +258,16 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 			var data = strings.NewReader(dataPrefix + hash + dataSuffix)
 			req, err := http.NewRequest("POST", "https://api.testnet.evm.eosnetwork.com", data)
 			if err != nil {
-				fmt.Println("debug1", err.Error())
-				fmt.Println("debug1", data)
 				return nil, nil, err
 			}
 			req.Header.Set("Content-Type", "application/json")
 			resp, err := client.Do(req)
 			if err != nil {
-				fmt.Println("debug2", err.Error())
 				return nil, nil, err
 			}
 			defer resp.Body.Close()
 			bodyText, err := io.ReadAll(resp.Body)
 			if err != nil {
-				fmt.Println("debug3", err.Error())
 				return nil, nil, err
 			}
 
@@ -303,9 +296,6 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 				Result Block `json:"result"`
 			}
 			var jsonResp JsonResp
-			fmt.Println("debug----")
-			fmt.Println(string(bodyText))
-			fmt.Println("debug----")
 			err = json.Unmarshal(bodyText, &jsonResp)
 			if err != nil {
 				return nil, nil, err
@@ -317,7 +307,6 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 			var baseFee hexutil.Big
 			baseFee = hexutil.Big(*(hexutil.MustDecodeBig("0x0")))
 			var difficulty hexutil.Big
-			fmt.Println("debug", jsonResp.Result.Difficulty)
 			difficulty = hexutil.Big(*(hexutil.MustDecodeBig(jsonResp.Result.Difficulty)))
 
 			block = &rpcBlock{
@@ -344,7 +333,6 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 		}
 		err = nil
 	}
-	fmt.Println("debugC4")
 	if block == nil {
 		return nil, nil, ethereum.NotFound
 	}
@@ -355,20 +343,14 @@ func (s *EthClient) blockCall(ctx context.Context, method string, id rpcBlockID)
 	} else {
 		info, txs, err = block.Info(s.trustRPC, s.mustBePostMerge)
 	}
-	fmt.Println("debugC5")
 	if err != nil {
-		fmt.Println("debugC6")
 		return nil, nil, err
 	}
-	fmt.Println("debugC7")
 	if err := id.CheckID(eth.ToBlockID(info)); err != nil {
 		return nil, nil, fmt.Errorf("fetched block data does not match requested ID: %w", err)
 	}
-	fmt.Println("debugC8")
 	s.headersCache.Add(info.Hash(), info)
-	fmt.Println("debugC9")
 	s.transactionsCache.Add(info.Hash(), txs)
-	fmt.Println("debugC10")
 	return info, txs, nil
 }
 
@@ -420,13 +402,11 @@ func (s *EthClient) InfoByLabel(ctx context.Context, label eth.BlockLabel) (eth.
 }
 
 func (s *EthClient) InfoAndTxsByHash(ctx context.Context, hash common.Hash) (eth.BlockInfo, types.Transactions, error) {
-	fmt.Println("debugC", hash.String())
 	if header, ok := s.headersCache.Get(hash); ok {
 		if txs, ok := s.transactionsCache.Get(hash); ok {
 			return header, txs, nil
 		}
 	}
-	fmt.Println("debugC1", hash.String())
 	return s.blockCall(ctx, "eth_getBlockByHash", hashID(hash))
 }
 
@@ -459,36 +439,34 @@ func (s *EthClient) PayloadByLabel(ctx context.Context, label eth.BlockLabel) (*
 // It verifies the receipt hash in the block header against the receipt hash of the fetched receipts
 // to ensure that the execution engine did not fail to return any receipts.
 func (s *EthClient) FetchReceipts(ctx context.Context, blockHash common.Hash) (eth.BlockInfo, types.Receipts, error) {
-	fmt.Println("debug", blockHash)
+	fmt.Println("debugB2_0")
 	info, txs, err := s.InfoAndTxsByHash(ctx, blockHash)
-	fmt.Println("debug1")
 	if err != nil {
 		return nil, nil, err
 	}
 	// Try to reuse the receipts fetcher because is caches the results of intermediate calls. This means
 	// that if just one of many calls fail, we only retry the failed call rather than all of the calls.
 	// The underlying fetcher uses the receipts hash to verify receipt integrity.
-	fmt.Println("debug2")
 	var job *receiptsFetchingJob
-	fmt.Println("debug3")
 	if v, ok := s.receiptsCache.Get(blockHash); ok {
-		fmt.Println("debug4")
 		job = v
 	} else {
-		fmt.Println("debug5")
 		txHashes := eth.TransactionsToHashes(txs)
-		fmt.Println("debug6")
 		job = NewReceiptsFetchingJob(s, s.client, s.maxBatchSize, eth.ToBlockID(info), info.ReceiptHash(), txHashes)
-		fmt.Println("debug7")
 		s.receiptsCache.Add(blockHash, job)
 	}
-	fmt.Println("debug8")
 	receipts, err := job.Fetch(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	fmt.Println("debug9")
+	fmt.Println("debugB2_1", len(receipts))
+	{
+		for i, item := range receipts {
+			fmt.Println("debugB2_2, ", i, ":", item.TxHash)
+		}
+
+	}
 	return info, receipts, nil
 }
 

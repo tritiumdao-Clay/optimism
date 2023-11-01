@@ -275,10 +275,14 @@ func (eq *EngineQueue) Step(ctx context.Context) error {
 		return err
 	}
 	if next, err := eq.prev.NextAttributes(ctx, eq.safeHead); err == io.EOF {
+		fmt.Println("debugD0")
 		outOfData = true
 	} else if err != nil {
+		fmt.Println("debugD1")
 		return err
 	} else {
+		fmt.Println("debugD2", eq.safeHead)
+		fmt.Println("debugD2", next)
 		eq.safeAttributes = &attributesWithParent{
 			attributes: next,
 			parent:     eq.safeHead,

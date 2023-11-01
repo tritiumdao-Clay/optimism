@@ -153,12 +153,7 @@ func L1InfoDeposit(seqNumber uint64, block eth.BlockInfo, sysCfg eth.SystemConfi
 		L1FeeOverhead:  sysCfg.Overhead,
 		L1FeeScalar:    sysCfg.Scalar,
 	}
-	fmt.Println("debug0")
-	fmt.Println(block.BaseFee())
-	fmt.Println("debug0")
-	fmt.Printf("t1: %T\n", block)
 	data, err := infoDat.MarshalBinary()
-	fmt.Println("debug1")
 	if err != nil {
 		return nil, err
 	}
