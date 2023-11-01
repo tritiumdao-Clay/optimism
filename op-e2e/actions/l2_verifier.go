@@ -3,7 +3,6 @@ package actions
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -212,7 +211,6 @@ func (s *L2Verifier) ActL2PipelineStep(t Testing) {
 
 	s.l2PipelineIdle = false
 	err := s.derivation.Step(t.Ctx())
-	fmt.Println("debugJ0")
 	if err == io.EOF || (err != nil && errors.Is(err, derive.EngineP2PSyncing)) {
 		s.l2PipelineIdle = true
 		return
