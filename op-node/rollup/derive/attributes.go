@@ -62,7 +62,7 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 	if l2Parent.L1Origin.Number != epoch.Number {
 		fmt.Println("debugB2: ", reflect.TypeOf(ba.l1), epoch.Hash)
 		info, receipts, err := ba.l1.FetchReceipts(ctx, epoch.Hash)
-		fmt.Println("debugB3")
+		fmt.Println("debugB3", len(receipts))
 		if err != nil {
 			return nil, NewTemporaryError(fmt.Errorf("failed to fetch L1 block info and receipts: %w", err))
 		}

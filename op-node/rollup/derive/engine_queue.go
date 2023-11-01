@@ -280,6 +280,7 @@ func (eq *EngineQueue) Step(ctx context.Context) error {
 	} else if err != nil {
 		return err
 	} else {
+		fmt.Println("debugI1", next.Transactions)
 		eq.safeAttributes = &attributesWithParent{
 			attributes: next,
 			parent:     eq.safeHead,
