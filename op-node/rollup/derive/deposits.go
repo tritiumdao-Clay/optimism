@@ -12,6 +12,7 @@ import (
 
 // UserDeposits transforms the L2 block-height and L1 receipts into the transaction inputs for a full L2 block
 func UserDeposits(receipts []*types.Receipt, depositContractAddr common.Address) ([]*types.DepositTx, error) {
+	fmt.Println("debug0")
 	var out []*types.DepositTx
 	var result error
 	for i, rec := range receipts {
@@ -33,11 +34,14 @@ func UserDeposits(receipts []*types.Receipt, depositContractAddr common.Address)
 }
 
 func DeriveDeposits(receipts []*types.Receipt, depositContractAddr common.Address) ([]hexutil.Bytes, error) {
+	fmt.Println("debug00, DeriveDeposit")
 	var result error
 	userDeposits, err := UserDeposits(receipts, depositContractAddr)
+	fmt.Println("debug01")
 	if err != nil {
 		result = multierror.Append(result, err)
 	}
+	fmt.Println("debug02")
 	encodedTxs := make([]hexutil.Bytes, 0, len(userDeposits))
 	for i, tx := range userDeposits {
 		opaqueTx, err := types.NewTx(tx).MarshalBinary()

@@ -2,8 +2,8 @@ package derive
 
 import (
 	"context"
-	"reflect"
 	"fmt"
+	"reflect"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -66,17 +66,21 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 		if err != nil {
 			return nil, NewTemporaryError(fmt.Errorf("failed to fetch L1 block info and receipts: %w", err))
 		}
+		fmt.Println("debug4")
 		if l2Parent.L1Origin.Hash != info.ParentHash() {
 			return nil, NewResetError(
 				fmt.Errorf("cannot create new block with L1 origin %s (parent %s) on top of L1 origin %s",
 					epoch, info.ParentHash(), l2Parent.L1Origin))
 		}
 
+		fmt.Println("debug5")
 		deposits, err := DeriveDeposits(receipts, ba.cfg.DepositContractAddress)
 		if err != nil {
 			// deposits may never be ignored. Failing to process them is a critical error.
+			fmt.Println("debug6")
 			return nil, NewCriticalError(fmt.Errorf("failed to derive some deposits: %w", err))
 		}
+		fmt.Println("debug7", len(deposits))
 		// apply sysCfg changes
 		if err := UpdateSystemConfigWithL1Receipts(&sysConfig, receipts, ba.cfg); err != nil {
 			return nil, NewCriticalError(fmt.Errorf("failed to apply derived L1 sysCfg updates: %w", err))
@@ -90,12 +94,12 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 		if l2Parent.L1Origin.Hash != epoch.Hash {
 			return nil, NewResetError(fmt.Errorf("cannot create new block with L1 origin %s in conflict with L1 origin %s", epoch, l2Parent.L1Origin))
 		}
-		fmt.Println("debug9");
+		fmt.Println("debug9")
 		info, err := ba.l1.InfoByHash(ctx, epoch.Hash)
 		if err != nil {
 			return nil, NewTemporaryError(fmt.Errorf("failed to fetch L1 block info: %w", err))
 		}
-		fmt.Println("debug10");
+		fmt.Println("debug10")
 		l1Info = info
 		depositTxs = nil
 		seqNumber = l2Parent.SequenceNumber + 1
