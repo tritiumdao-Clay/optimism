@@ -117,6 +117,7 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 		return nil, NewCriticalError(fmt.Errorf("failed to create l1InfoTx: %w", err))
 	}
 
+	fmt.Println("debugF", len(depositTxs), l1Info.Hash(), l1Info.NumberU64())
 	txs := make([]hexutil.Bytes, 0, 1+len(depositTxs))
 	txs = append(txs, l1InfoTx)
 	txs = append(txs, depositTxs...)
