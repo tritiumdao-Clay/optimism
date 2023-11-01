@@ -281,7 +281,8 @@ func (eq *EngineQueue) Step(ctx context.Context) error {
 		fmt.Println("debugD1")
 		return err
 	} else {
-		fmt.Println("debugD2")
+		fmt.Println("debugD2", eq.safeHead)
+		fmt.Println("debugD2", next)
 		eq.safeAttributes = &attributesWithParent{
 			attributes: next,
 			parent:     eq.safeHead,

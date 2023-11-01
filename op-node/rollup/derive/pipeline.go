@@ -214,7 +214,7 @@ func (dp *DerivationPipeline) Step(ctx context.Context) error {
 		fmt.Println("debugD3a")
 		return err
 	} else if err != nil {
-		fmt.Println("debugD3b")
+		fmt.Println("debugD3b: ", err.Error())
 		return fmt.Errorf("engine stage failed: %w", err)
 	} else {
 		fmt.Println("debugD3c")

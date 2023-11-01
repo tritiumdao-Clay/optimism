@@ -315,37 +315,45 @@ func (s *Driver) eventLoop() {
 			fmt.Println("debugD4")
 			stepAttempts += 1 // count as attempt by default. We reset to 0 if we are making healthy progress.
 			if err == io.EOF {
+				fmt.Println("debugD4a: ")
 				s.log.Debug("Derivation process went idle", "progress", s.derivation.Origin(), "err", err)
 				stepAttempts = 0
 				s.metrics.SetDerivationIdle(true)
 				continue
 			} else if err != nil && errors.Is(err, derive.EngineP2PSyncing) {
+				fmt.Println("debugD4b: ", err.Error())
 				s.log.Debug("Derivation process went idle because the engine is syncing", "progress", s.derivation.Origin(), "sync_target", s.derivation.EngineSyncTarget(), "err", err)
 				stepAttempts = 0
 				s.metrics.SetDerivationIdle(true)
 				continue
 			} else if err != nil && errors.Is(err, derive.ErrReset) {
+				fmt.Println("debugD4c: ", err.Error())
 				// If the pipeline corrupts, e.g. due to a reorg, simply reset it
 				s.log.Warn("Derivation pipeline is reset", "err", err)
 				s.derivation.Reset()
 				s.metrics.RecordPipelineReset()
 				continue
 			} else if err != nil && errors.Is(err, derive.ErrTemporary) {
+				fmt.Println("debugD4d: ", err.Error())
 				s.log.Warn("Derivation process temporary error", "attempts", stepAttempts, "err", err)
 				reqStep()
 				continue
 			} else if err != nil && errors.Is(err, derive.ErrCritical) {
+				fmt.Println("debugD4e: ", err.Error())
 				s.log.Error("Derivation process critical error", "err", err)
 				return
 			} else if err != nil && errors.Is(err, derive.NotEnoughData) {
+				fmt.Println("debugD4f: ", err.Error())
 				stepAttempts = 0 // don't do a backoff for this error
 				reqStep()
 				continue
 			} else if err != nil {
+				fmt.Println("debugD4g: ", err.Error())
 				s.log.Error("Derivation process error", "attempts", stepAttempts, "err", err)
 				reqStep()
 				continue
 			} else {
+				fmt.Println("debugD4h: ", err.Error())
 				stepAttempts = 0
 				reqStep() // continue with the next step if we can
 			}

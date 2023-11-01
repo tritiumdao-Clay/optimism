@@ -60,8 +60,10 @@ func (aq *AttributesQueue) NextAttributes(ctx context.Context, l2SafeHead eth.L2
 
 	// Actually generate the next attributes
 	if attrs, err := aq.createNextAttributes(ctx, aq.batch, l2SafeHead); err != nil {
+		fmt.Println("debugC1:", err.Error())
 		return nil, err
 	} else {
+		fmt.Println("debugC1")
 		// Clear out the local state once we will succeed
 		aq.batch = nil
 		return attrs, nil
