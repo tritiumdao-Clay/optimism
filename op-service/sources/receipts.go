@@ -464,6 +464,7 @@ func (job *receiptsFetchingJob) runAltMethod(ctx context.Context, m ReceiptsFetc
 		err = job.client.CallContext(ctx, &result, "parity_getBlockReceipts", job.block.Hash)
 	case EthGetBlockReceipts:
 		//err = job.client.CallContext(ctx, &result, "eth_getBlockReceipts", job.block.Hash)
+		fmt.Println("debugB0:eth_getBlockReceipts", job.block.Number)
 		err = job.client.CallContext(ctx, &result, "eth_getBlockReceipts", strconv.Itoa(int(job.block.Number)))
 	case ErigonGetBlockReceiptsByBlockHash:
 		err = job.client.CallContext(ctx, &result, "erigon_getBlockReceiptsByBlockHash", job.block.Hash)
@@ -488,7 +489,7 @@ func (job *receiptsFetchingJob) runAltMethod(ctx context.Context, m ReceiptsFetc
 // The job caches the result, so repeated Fetches add no additional cost.
 // Fetch is safe to be called concurrently, and will lock to avoid duplicate work or internal inconsistency.
 func (job *receiptsFetchingJob) Fetch(ctx context.Context) (types.Receipts, error) {
-	fmt.Println("debugB0")
+	fmt.Println("debugB0", len(job.txHashes))
 	job.m.Lock()
 	defer job.m.Unlock()
 
@@ -509,4 +510,5 @@ func (job *receiptsFetchingJob) Fetch(ctx context.Context) (types.Receipts, erro
 	}
 
 	return job.result, nil
+	fmt.Println("debugB0:JOB_RESULT", len(job.result))
 }

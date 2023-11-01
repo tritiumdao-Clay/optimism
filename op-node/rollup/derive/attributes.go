@@ -60,7 +60,7 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 	// user deposits.
 	fmt.Println("debug1", l2Parent.L1Origin.Number, epoch.Number)
 	if l2Parent.L1Origin.Number != epoch.Number {
-		fmt.Println("debug2: ", reflect.TypeOf(ba.l1))
+		fmt.Println("debug2: ", reflect.TypeOf(ba.l1), epoch.Hash)
 		info, receipts, err := ba.l1.FetchReceipts(ctx, epoch.Hash)
 		fmt.Println("debug3")
 		if err != nil {

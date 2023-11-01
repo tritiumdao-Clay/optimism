@@ -65,21 +65,26 @@ func (d *Sequencer) StartBuildingBlock(ctx context.Context) error {
 
 	// Figure out which L1 origin block we're going to be building on top of.
 	l1Origin, err := d.l1OriginSelector.FindL1Origin(ctx, l2Head)
+	fmt.Println("debugA", l2Head.Number, l2Head.Hash)
+	fmt.Println("debugA", l1Origin.Number, l1Origin.Hash)
 	if err != nil {
 		d.log.Error("Error finding next L1 Origin", "err", err)
 		return err
 	}
 
+	fmt.Println("debugA0")
 	if !(l2Head.L1Origin.Hash == l1Origin.ParentHash || l2Head.L1Origin.Hash == l1Origin.Hash) {
 		d.metrics.RecordSequencerInconsistentL1Origin(l2Head.L1Origin, l1Origin.ID())
 		return derive.NewResetError(fmt.Errorf("cannot build new L2 block with L1 origin %s (parent L1 %s) on current L2 head %s with L1 origin %s", l1Origin, l1Origin.ParentHash, l2Head, l2Head.L1Origin))
 	}
 
+	fmt.Println("debugA1")
 	d.log.Info("creating new block", "parent", l2Head, "l1Origin", l1Origin)
 
 	fetchCtx, cancel := context.WithTimeout(ctx, time.Second*20)
 	defer cancel()
 
+	fmt.Println("debugA2", l1Origin.ID().Hash, l1Origin.ID().Number)
 	attrs, err := d.attrBuilder.PreparePayloadAttributes(fetchCtx, l2Head, l1Origin.ID())
 	if err != nil {
 		return err
