@@ -480,10 +480,10 @@ func (s *EthClient) FetchReceipts(ctx context.Context, blockHash common.Hash) (e
 		return nil, nil, err
 	}
 
-	fmt.Println("debugB9", len(receipts))
+	fmt.Println("debugB2_1", len(receipts))
 	{
 		for i, item := range receipts {
-			fmt.Println("debugB10, ", i, ":", item.TxHash)
+			fmt.Println("debugB2_2, ", i, ":", item.TxHash)
 		}
 
 	}

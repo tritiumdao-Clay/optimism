@@ -90,16 +90,13 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 		depositTxs = deposits
 		seqNumber = 0
 	} else {
-		fmt.Println("debugB8")
 		if l2Parent.L1Origin.Hash != epoch.Hash {
 			return nil, NewResetError(fmt.Errorf("cannot create new block with L1 origin %s in conflict with L1 origin %s", epoch, l2Parent.L1Origin))
 		}
-		fmt.Println("debugB9")
 		info, err := ba.l1.InfoByHash(ctx, epoch.Hash)
 		if err != nil {
 			return nil, NewTemporaryError(fmt.Errorf("failed to fetch L1 block info: %w", err))
 		}
-		fmt.Println("debugB10")
 		l1Info = info
 		depositTxs = nil
 		seqNumber = l2Parent.SequenceNumber + 1
