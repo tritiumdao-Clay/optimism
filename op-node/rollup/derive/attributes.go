@@ -114,10 +114,10 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 		return nil, NewCriticalError(fmt.Errorf("failed to create l1InfoTx: %w", err))
 	}
 
-	fmt.Println("debugF", len(depositTxs), l1Info.Hash(), l1Info.NumberU64())
+	fmt.Println("debugB8", len(depositTxs), l1Info.Hash(), l1Info.NumberU64())
 	{
 		for i, item := range depositTxs {
-			fmt.Println("debugF1, ", i, item.String())
+			fmt.Println("debugF8, ", i, item.String())
 		}
 	}
 

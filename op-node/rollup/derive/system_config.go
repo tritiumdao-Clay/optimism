@@ -37,7 +37,6 @@ func UpdateSystemConfigWithL1Receipts(sysCfg *eth.SystemConfig, receipts []*type
 			continue
 		}
 		for j, log := range rec.Logs {
-			fmt.Println("debugBB2", rec.TxHash, log.Address, cfg.L1SystemConfigAddress)
 			if log.Address == cfg.L1SystemConfigAddress && len(log.Topics) > 0 && log.Topics[0] == ConfigUpdateEventABIHash {
 				if err := ProcessSystemConfigUpdateLogEvent(sysCfg, log); err != nil {
 					result = multierror.Append(result, fmt.Errorf("malformatted L1 system sysCfg log in receipt %d, log %d: %w", i, j, err))

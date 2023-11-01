@@ -90,10 +90,10 @@ func (aq *AttributesQueue) createNextAttributes(ctx context.Context, batch *Batc
 	// we are verifying, not sequencing, we've got all transactions and do not pull from the tx-pool
 	// (that would make the block derivation non-deterministic)
 	attrs.NoTxPool = true
-	fmt.Println("debugH0", batch.Epoch().Hash, batch.Epoch().Number)
+	fmt.Println("debugC0", batch.Epoch().Hash, batch.Epoch().Number)
 	{
 		for i, item := range batch.Transactions {
-			fmt.Println("debugH1", i, item.String())
+			fmt.Println("debugC0", i, item.String())
 		}
 	}
 	attrs.Transactions = append(attrs.Transactions, batch.Transactions...)

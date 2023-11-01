@@ -2,8 +2,6 @@ package driver
 
 import (
 	"context"
-	"fmt"
-	"reflect"
 	"time"
 
 	"github.com/ethereum-optimism/optimism/op-node/rollup/derive"
@@ -56,7 +54,6 @@ func (m *MeteredL1Fetcher) InfoAndTxsByHash(ctx context.Context, hash common.Has
 
 func (m *MeteredL1Fetcher) FetchReceipts(ctx context.Context, blockHash common.Hash) (eth.BlockInfo, types.Receipts, error) {
 	defer m.recordTime("FetchReceipts")()
-	fmt.Println("debugD0:", reflect.TypeOf(m.inner))
 	return m.inner.FetchReceipts(ctx, blockHash)
 }
 
