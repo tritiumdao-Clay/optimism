@@ -71,6 +71,7 @@ func (l1t *L1Traversal) AdvanceL1Block(ctx context.Context) error {
 	}
 
 	// Parse L1 receipts of the given block and update the L1 system configuration
+	fmt.Println("debugFetchReceipts")
 	_, receipts, err := l1t.l1Blocks.FetchReceipts(ctx, nextL1Origin.Hash)
 	if err != nil {
 		return NewTemporaryError(fmt.Errorf("failed to fetch receipts of L1 block %s (parent: %s) for L1 sysCfg update: %w", nextL1Origin, origin, err))
