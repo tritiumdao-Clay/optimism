@@ -353,7 +353,7 @@ func (s *Driver) eventLoop() {
 				reqStep()
 				continue
 			} else {
-				fmt.Println("debugD4h: ", err.Error())
+				fmt.Println("debugD4h: ")
 				stepAttempts = 0
 				reqStep() // continue with the next step if we can
 			}
