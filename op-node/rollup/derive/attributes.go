@@ -118,6 +118,12 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 	}
 
 	fmt.Println("debugF", len(depositTxs), l1Info.Hash(), l1Info.NumberU64())
+	{
+		for i, item := range depositTxs {
+			fmt.Println("debugF1, ", i, item.String())
+		}
+	}
+
 	txs := make([]hexutil.Bytes, 0, 1+len(depositTxs))
 	txs = append(txs, l1InfoTx)
 	txs = append(txs, depositTxs...)
