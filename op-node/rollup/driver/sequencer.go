@@ -94,6 +94,7 @@ func (d *Sequencer) StartBuildingBlock(ctx context.Context) error {
 	// empty blocks (other than the L1 info deposit and any user deposits). We handle this by
 	// setting NoTxPool to true, which will cause the Sequencer to not include any transactions
 	// from the transaction pool.
+	fmt.Println("debugA3")
 	attrs.NoTxPool = uint64(attrs.Timestamp) > l1Origin.Time+d.config.MaxSequencerDrift
 
 	//Debug

@@ -49,7 +49,7 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 	var depositTxs []hexutil.Bytes
 	var seqNumber uint64
 
-	fmt.Println("debug0")
+	fmt.Println("debugB0")
 	sysConfig, err := ba.l2.SystemConfigByL2Hash(ctx, l2Parent.Hash)
 	if err != nil {
 		return nil, NewTemporaryError(fmt.Errorf("failed to retrieve L2 parent block: %w", err))
@@ -58,29 +58,29 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 	// If the L1 origin changed this block, then we are in the first block of the epoch. In this
 	// case we need to fetch all transaction receipts from the L1 origin block so we can scan for
 	// user deposits.
-	fmt.Println("debug1", l2Parent.L1Origin.Number, epoch.Number)
+	fmt.Println("debugB1", l2Parent.L1Origin.Number, epoch.Number)
 	if l2Parent.L1Origin.Number != epoch.Number {
-		fmt.Println("debug2: ", reflect.TypeOf(ba.l1), epoch.Hash)
+		fmt.Println("debugB2: ", reflect.TypeOf(ba.l1), epoch.Hash)
 		info, receipts, err := ba.l1.FetchReceipts(ctx, epoch.Hash)
-		fmt.Println("debug3")
+		fmt.Println("debugB3")
 		if err != nil {
 			return nil, NewTemporaryError(fmt.Errorf("failed to fetch L1 block info and receipts: %w", err))
 		}
-		fmt.Println("debug4")
+		fmt.Println("debugB4")
 		if l2Parent.L1Origin.Hash != info.ParentHash() {
 			return nil, NewResetError(
 				fmt.Errorf("cannot create new block with L1 origin %s (parent %s) on top of L1 origin %s",
 					epoch, info.ParentHash(), l2Parent.L1Origin))
 		}
 
-		fmt.Println("debug5")
+		fmt.Println("debugB5")
 		deposits, err := DeriveDeposits(receipts, ba.cfg.DepositContractAddress)
 		if err != nil {
 			// deposits may never be ignored. Failing to process them is a critical error.
-			fmt.Println("debug6")
+			fmt.Println("debugB6")
 			return nil, NewCriticalError(fmt.Errorf("failed to derive some deposits: %w", err))
 		}
-		fmt.Println("debug7", len(deposits))
+		fmt.Println("debugB7", len(deposits))
 		// apply sysCfg changes
 		if err := UpdateSystemConfigWithL1Receipts(&sysConfig, receipts, ba.cfg); err != nil {
 			return nil, NewCriticalError(fmt.Errorf("failed to apply derived L1 sysCfg updates: %w", err))
@@ -90,16 +90,16 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 		depositTxs = deposits
 		seqNumber = 0
 	} else {
-		fmt.Println("debug8")
+		fmt.Println("debugB8")
 		if l2Parent.L1Origin.Hash != epoch.Hash {
 			return nil, NewResetError(fmt.Errorf("cannot create new block with L1 origin %s in conflict with L1 origin %s", epoch, l2Parent.L1Origin))
 		}
-		fmt.Println("debug9")
+		fmt.Println("debugB9")
 		info, err := ba.l1.InfoByHash(ctx, epoch.Hash)
 		if err != nil {
 			return nil, NewTemporaryError(fmt.Errorf("failed to fetch L1 block info: %w", err))
 		}
-		fmt.Println("debug10")
+		fmt.Println("debugB10")
 		l1Info = info
 		depositTxs = nil
 		seqNumber = l2Parent.SequenceNumber + 1
