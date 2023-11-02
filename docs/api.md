@@ -47,7 +47,7 @@
 
   ```javascript
   function depositETH(
-            uint32 amount,              // 充值金额, 单位 wei
+            uint32 minGasLimit,              // 默认参数1000000
             bytes data                  //默认参数填写0x0
   )
   ```
