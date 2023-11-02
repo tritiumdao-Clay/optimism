@@ -1,4 +1,4 @@
-# **FractonX - 联调对接文档**
+# **opEOS - 联调对接文档**
 
 <details><summary>联调日志</summary>
 
