@@ -229,7 +229,8 @@ func getVersion(address common.Address) (string, error) {
 		Result string `json:"result"`
 	}
 	var res JsonResp
-	version, err := hex.DecodeString(string(res.Result))
+	fmt.Println("debug00:", res.Result)
+	version, err := hex.DecodeString(res.Result)
 	fmt.Println("debug0:", version)
 
 	return string(version), nil
