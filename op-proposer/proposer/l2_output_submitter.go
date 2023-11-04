@@ -220,11 +220,13 @@ func getVersion(address common.Address) (string, error) {
 		panic(err)
 	}
 	defer resp.Body.Close()
-	buffer := make([]byte, 256)
+	buffer := make([]byte, 128)
 	_, err = resp.Body.Read(buffer)
 	if err != nil {
 		panic(err)
 	}
+	s := string(buffer)
+	fmt.Println("debug000", s)
 	version, err := hex.DecodeString(string(buffer))
 	fmt.Println("debug0:", version)
 
