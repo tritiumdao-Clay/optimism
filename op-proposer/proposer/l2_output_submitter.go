@@ -198,15 +198,19 @@ func NewL2OutputSubmitterConfigFromCLIConfig(cfg CLIConfig, l log.Logger, m metr
 func NewL2OutputSubmitter(cfg Config, l log.Logger, m metrics.Metricer) (*L2OutputSubmitter, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
+	fmt.Println("debug0")
 	l2ooContract, err := bindings.NewL2OutputOracleCaller(cfg.L2OutputOracleAddr, cfg.L1Client)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("failed to create L2OO at address %s: %w", cfg.L2OutputOracleAddr, err)
 	}
 
+	fmt.Println("debug1")
 	cCtx, cCancel := context.WithTimeout(ctx, cfg.NetworkTimeout)
 	defer cCancel()
+	fmt.Println("debug2")
 	version, err := l2ooContract.Version(&bind.CallOpts{Context: cCtx})
+	fmt.Println("debug3", version)
 	if err != nil {
 		cancel()
 		return nil, err
