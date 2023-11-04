@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	L2OO "github.com/ethereum-optimism/optimism/abi"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"math/big"
 	_ "net/http/pprof"
 	"sync"
@@ -194,25 +196,48 @@ func NewL2OutputSubmitterConfigFromCLIConfig(cfg CLIConfig, l log.Logger, m metr
 
 }
 
+func getVersion(address common.Address) (string, error) {
+	conn, err := ethclient.Dial("https://api.testnet.evm.eosnetwork.com")
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+
+	l2OO, err := L2OO.NewAbi(address, conn)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx, _ := context.WithCancel(context.Background())
+	cCtx, cancel := context.WithTimeout(ctx, time.Second*100)
+	version, err := l2OO.Version(&bind.CallOpts{Context: cCtx, From: common.HexToAddress("0x0000000000000000000000000000000000000000")})
+	if err != nil {
+		cancel()
+		panic(err)
+	}
+	return version, nil
+}
+
 // NewL2OutputSubmitter creates a new L2 Output Submitter
 func NewL2OutputSubmitter(cfg Config, l log.Logger, m metrics.Metricer) (*L2OutputSubmitter, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	fmt.Println("debug0")
 	l2ooContract, err := bindings.NewL2OutputOracleCaller(cfg.L2OutputOracleAddr, cfg.L1Client)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("failed to create L2OO at address %s: %w", cfg.L2OutputOracleAddr, err)
 	}
 
-	fmt.Println("debug1")
-	cCtx, cCancel := context.WithTimeout(ctx, cfg.NetworkTimeout)
-	defer cCancel()
-	fmt.Println("debug2")
-	version, err := l2ooContract.Version(&bind.CallOpts{Context: cCtx})
-	fmt.Println("debug3", version)
+	//cCtx, cCancel := context.WithTimeout(ctx, cfg.NetworkTimeout)
+	//defer cCancel()
+	//version, err := l2ooContract.Version(&bind.CallOpts{Context: cCtx})
+	//if err != nil {
+	//	cancel()
+	//	return nil, err
+	//}
+	version, err := getVersion(cfg.L2OutputOracleAddr)
+	fmt.Println("debug:", version)
 	if err != nil {
-		cancel()
 		return nil, err
 	}
 	log.Info("Connected to L2OutputOracle", "address", cfg.L2OutputOracleAddr, "version", version)

@@ -48,3 +48,6 @@ __pycache__
 
 # Ignore echidna artifacts
 crytic-export
+
+abi/abigen
+abi/generate_go_file.sh
