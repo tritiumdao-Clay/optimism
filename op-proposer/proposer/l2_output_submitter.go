@@ -220,7 +220,7 @@ func getVersion(address common.Address) (string, error) {
 		panic(err)
 	}
 	defer resp.Body.Close()
-	buffer := make([]byte, 0)
+	buffer := make([]byte, 256)
 	_, err = resp.Body.Read(buffer)
 	if err != nil {
 		panic(err)
