@@ -3,6 +3,7 @@ package proposer
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
@@ -220,8 +221,16 @@ func getVersion(address common.Address) (string, error) {
 		panic(err)
 	}
 	defer resp.Body.Close()
-	buffer := make([]byte, 128)
+	buffer := make([]byte, 512)
 	_, err = resp.Body.Read(buffer)
+	if err != nil {
+		panic(err)
+	}
+	type JsonResp struct {
+		Result string `json:"result"`
+	}
+	var res JsonResp
+	err = json.Unmarshal(buffer, &res)
 	if err != nil {
 		panic(err)
 	}
