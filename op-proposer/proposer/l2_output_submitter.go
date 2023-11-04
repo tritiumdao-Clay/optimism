@@ -204,7 +204,7 @@ func getVersion(address common.Address) (string, error) {
 	// --header 'Content-Type: text/plain' \
 	// --data '{"jsonrpc":"2.0","id":1,"method":"eth_call","params":[{"from":"0x0000000000000000000000000000000000000000","data":"0x54fd4d50","to":"0x40d046f41b6e161909054c0f3ae075199d363c23"},"latest"]}'
 
-	prefixData := `{"jsonrpc":"2.0","id":1,"method":"eth_call","params":[{"from":"`
+	prefixData := `{"jsonrpc":"2.0","id":1,"method":"eth_call","params":[{"from":"0x0000000000000000000000000000000000000000","input":"0x54fd4d50","to":"`
 	suffixData := `"},"latest"]}`
 	data := prefixData + address.String() + suffixData
 	fmt.Println("debug-:", data)
