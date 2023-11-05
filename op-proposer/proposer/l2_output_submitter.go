@@ -237,8 +237,10 @@ func getVersion(address common.Address) (string, error) {
 		panic(err)
 	}
 	tmpByte := []byte(res.Result)
-	tmpStr := string(tmpByte[2:])
-	tmpStr = fmt.Sprintf("%s", tmpStr)
+	tmpByte = tmpByte[2:]
+	tmpByte = tmpByte[len(tmpByte)-64:]
+	tmpByte = tmpByte[:10]
+	tmpStr := string(tmpByte)
 	version, err := hex.DecodeString(tmpStr)
 	if err != nil {
 		panic(err)
