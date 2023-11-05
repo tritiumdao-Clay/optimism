@@ -242,6 +242,7 @@ func getVersion(address common.Address) (string, error) {
 	if err != nil {
 		panic(err)
 	}
+	strconv.par
 	return string(version), nil
 }
 
@@ -255,18 +256,20 @@ func NewL2OutputSubmitter(cfg Config, l log.Logger, m metrics.Metricer) (*L2Outp
 		return nil, fmt.Errorf("failed to create L2OO at address %s: %w", cfg.L2OutputOracleAddr, err)
 	}
 
-	//cCtx, cCancel := context.WithTimeout(ctx, cfg.NetworkTimeout)
-	//defer cCancel()
-	//version, err := l2ooContract.Version(&bind.CallOpts{Context: cCtx})
-	//if err != nil {
-	//	cancel()
-	//	return nil, err
-	//}
-	version, err := getVersion(cfg.L2OutputOracleAddr)
-	fmt.Println("debug:", version)
+	cCtx, cCancel := context.WithTimeout(ctx, cfg.NetworkTimeout)
+	defer cCancel()
+	version, err := l2ooContract.Version(&bind.CallOpts{Context: cCtx})
 	if err != nil {
+		cancel()
 		return nil, err
 	}
+	//version, err := getVersion(cfg.L2OutputOracleAddr)
+	//fmt.Println("debug:", version)
+	//os.Exit(1)
+	//if err != nil {
+	//	return nil, err
+	//}
+
 	log.Info("Connected to L2OutputOracle", "address", cfg.L2OutputOracleAddr, "version", version)
 
 	parsed, err := bindings.L2OutputOracleMetaData.GetAbi()
