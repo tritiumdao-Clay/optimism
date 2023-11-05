@@ -106,6 +106,7 @@ func sysncStatus(out **eth.SyncStatus) error {
 	}
 	var res JsonResp
 	buffer = buffer[:n-1]
+	fmt.Println("debug", string(buffer))
 	err = json.Unmarshal(buffer, &res)
 	if err != nil {
 		fmt.Println("debug14")
