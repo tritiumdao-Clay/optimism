@@ -329,7 +329,7 @@ func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.Outpu
 	// Fetch the current L2 heads
 	cCtx, cancel = context.WithTimeout(ctx, l.networkTimeout)
 	defer cancel()
-	fmt.Println("debug1:", err.Error())
+	fmt.Println("debug1:")
 	status, err := l.rollupClient.SyncStatus(cCtx)
 	if err != nil {
 		fmt.Println("debug2:", err.Error())
