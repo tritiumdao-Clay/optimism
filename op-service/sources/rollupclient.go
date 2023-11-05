@@ -2,7 +2,11 @@ package sources
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -21,8 +25,81 @@ func NewRollupClient(rpc client.RPC) *RollupClient {
 	return &RollupClient{rpc}
 }
 
+func outputAtBlock(hexBlockNumber string, out *eth.OutputResponse) error {
+	prefixData := `{"jsonrpc":"2.0","id":1,"method":"optimism_outputAtBlock","params":["`
+	suffixData := `"]}`
+	data := prefixData + hexBlockNumber + suffixData
+	fmt.Println("debug-:", data)
+	body := strings.NewReader(data)
+	req, err := http.NewRequest("POST", "http://127.0.0.1:8547", body)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "text/plain")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	buffer := make([]byte, 4096)
+	n, err := resp.Body.Read(buffer)
+	if err != nil || n == 4096 {
+		return err
+	}
+	type JsonResp struct {
+		Result eth.OutputResponse `json:"result"`
+	}
+	var res JsonResp
+	buffer = buffer[:n-1]
+	err = json.Unmarshal(buffer, &res)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("debugRes:", res.Result)
+	return errors.New("tmp debug")
+}
+
+func sysncStatus(out **eth.SyncStatus) error {
+	prefixData := `{"jsonrpc":"2.0","id":1,"method":"optimism_syncStatus","params":["`
+	suffixData := `"]}`
+	data := prefixData + suffixData
+	fmt.Println("debug-:", data)
+	body := strings.NewReader(data)
+	req, err := http.NewRequest("POST", "http://127.0.0.1:8547", body)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "text/plain")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	buffer := make([]byte, 4096)
+	n, err := resp.Body.Read(buffer)
+	if err != nil || n == 4096 {
+		return err
+	}
+	type JsonResp struct {
+		Result eth.SyncStatus `json:"result"`
+	}
+	var res JsonResp
+	buffer = buffer[:n-1]
+	err = json.Unmarshal(buffer, &res)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("debugRes:", res.Result)
+	return errors.New("tmp debug")
+}
+
 func (r *RollupClient) OutputAtBlock(ctx context.Context, blockNum uint64) (*eth.OutputResponse, error) {
 	var output *eth.OutputResponse
+
 	err := r.rpc.CallContext(ctx, &output, "optimism_outputAtBlock", hexutil.Uint64(blockNum))
 	return output, err
 }
@@ -30,7 +107,8 @@ func (r *RollupClient) OutputAtBlock(ctx context.Context, blockNum uint64) (*eth
 func (r *RollupClient) SyncStatus(ctx context.Context) (*eth.SyncStatus, error) {
 	var output *eth.SyncStatus
 	fmt.Println("debug10")
-	err := r.rpc.CallContext(ctx, &output, "optimism_syncStatus")
+	err := sysncStatus(&output)
+	//err := r.rpc.CallContext(ctx, &output, "optimism_syncStatus")
 	return output, err
 }
 
