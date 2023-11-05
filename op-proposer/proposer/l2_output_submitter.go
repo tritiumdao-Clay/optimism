@@ -9,7 +9,6 @@ import (
 	"math/big"
 	"net/http"
 	_ "net/http/pprof"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -273,7 +272,6 @@ func NewL2OutputSubmitter(cfg Config, l log.Logger, m metrics.Metricer) (*L2Outp
 	}
 
 	log.Info("Connected to L2OutputOracle", "address", cfg.L2OutputOracleAddr, "version", version)
-	os.Exit(1)
 
 	parsed, err := bindings.L2OutputOracleMetaData.GetAbi()
 	if err != nil {
