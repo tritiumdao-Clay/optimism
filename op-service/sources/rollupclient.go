@@ -71,7 +71,7 @@ func sysncStatus(out **eth.SyncStatus) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", "text/plain")
+	req.Header.Set("Content-Type", "application/plain")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
