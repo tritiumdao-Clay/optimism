@@ -325,11 +325,13 @@ func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.Outpu
 		l.log.Error("proposer unable to get next block number", "err", err)
 		return nil, false, err
 	}
+	fmt.Println("debug0")
 	// Fetch the current L2 heads
 	cCtx, cancel = context.WithTimeout(ctx, l.networkTimeout)
 	defer cancel()
 	status, err := l.rollupClient.SyncStatus(cCtx)
 	if err != nil {
+		fmt.Println("debug1:", err.Error())
 		l.log.Error("proposer unable to get sync status", "err", err)
 		return nil, false, err
 	}
@@ -343,6 +345,7 @@ func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.Outpu
 	}
 	// Ensure that we do not submit a block in the future
 	if currentBlockNumber.Cmp(nextCheckpointBlock) < 0 {
+		fmt.Println("debug1:", currentBlockNumber, nextCheckpointBlock)
 		l.log.Debug("proposer submission interval has not elapsed", "currentBlockNumber", currentBlockNumber, "nextBlockNumber", nextCheckpointBlock)
 		return nil, false, nil
 	}
@@ -368,7 +371,9 @@ func (l *L2OutputSubmitter) fetchOutput(ctx context.Context, block *big.Int) (*e
 	}
 
 	// Always propose if it's part of the Finalized L2 chain. Or if allowed, if it's part of the safe L2 chain.
+	fmt.Println("debug7")
 	if !(output.BlockRef.Number <= output.Status.FinalizedL2.Number || (l.allowNonFinalized && output.BlockRef.Number <= output.Status.SafeL2.Number)) {
+		fmt.Println("debug8")
 		l.log.Debug("not proposing yet, L2 block is not ready for proposal",
 			"l2_proposal", output.BlockRef,
 			"l2_safe", output.Status.SafeL2,
@@ -376,6 +381,7 @@ func (l *L2OutputSubmitter) fetchOutput(ctx context.Context, block *big.Int) (*e
 			"allow_non_finalized", l.allowNonFinalized)
 		return nil, false, nil
 	}
+	fmt.Println("debug9")
 	return output, true, nil
 }
 
