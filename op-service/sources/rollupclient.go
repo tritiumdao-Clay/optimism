@@ -113,8 +113,10 @@ func sysncStatus(out **eth.SyncStatus) error {
 		return err
 	}
 
+	persistPointer := &res.Result
+	out = &persistPointer
 	fmt.Println("debugRes:", res.Result)
-	return errors.New("tmp debug")
+	return nil
 }
 
 func (r *RollupClient) OutputAtBlock(ctx context.Context, blockNum uint64) (*eth.OutputResponse, error) {
