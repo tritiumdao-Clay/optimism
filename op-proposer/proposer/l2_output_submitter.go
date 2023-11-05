@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -242,7 +243,9 @@ func getVersion(address common.Address) (string, error) {
 	if err != nil {
 		panic(err)
 	}
-	return string(version), nil
+	tmpStr = fmt.Sprintf("%s", version)
+	tmpStr = strings.TrimSpace(tmpStr)
+	return tmpStr, nil
 }
 
 // NewL2OutputSubmitter creates a new L2 Output Submitter
@@ -255,19 +258,19 @@ func NewL2OutputSubmitter(cfg Config, l log.Logger, m metrics.Metricer) (*L2Outp
 		return nil, fmt.Errorf("failed to create L2OO at address %s: %w", cfg.L2OutputOracleAddr, err)
 	}
 
-	cCtx, cCancel := context.WithTimeout(ctx, cfg.NetworkTimeout)
-	defer cCancel()
-	version, err := l2ooContract.Version(&bind.CallOpts{Context: cCtx})
-	if err != nil {
-		cancel()
-		return nil, err
-	}
-	//version, err := getVersion(cfg.L2OutputOracleAddr)
-	//fmt.Println("debug:", version)
-	//os.Exit(1)
+	//cCtx, cCancel := context.WithTimeout(ctx, cfg.NetworkTimeout)
+	//defer cCancel()
+	//version, err := l2ooContract.Version(&bind.CallOpts{Context: cCtx})
 	//if err != nil {
+	//	cancel()
 	//	return nil, err
 	//}
+	version, err := getVersion(cfg.L2OutputOracleAddr)
+	fmt.Println("debug:", version)
+	os.Exit(1)
+	if err != nil {
+		return nil, err
+	}
 
 	log.Info("Connected to L2OutputOracle", "address", cfg.L2OutputOracleAddr, "version", version)
 
