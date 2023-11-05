@@ -344,7 +344,8 @@ func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.Outpu
 	fmt.Println("debug3:", status.SafeL2.L1Origin.Hash)
 	var currentBlockNumber *big.Int
 	if l.allowNonFinalized {
-		currentBlockNumber = new(big.Int).SetUint64(status.SafeL2.Number)
+		//currentBlockNumber = new(big.Int).SetUint64(status.SafeL2.Number)
+		currentBlockNumber = new(big.Int).SetUint64(status.UnSafeL2.Number)
 	} else {
 		currentBlockNumber = new(big.Int).SetUint64(status.FinalizedL2.Number)
 	}
