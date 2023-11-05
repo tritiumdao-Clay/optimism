@@ -266,13 +266,13 @@ func NewL2OutputSubmitter(cfg Config, l log.Logger, m metrics.Metricer) (*L2Outp
 	//	return nil, err
 	//}
 	version, err := getVersion(cfg.L2OutputOracleAddr)
-	fmt.Println("debug:", version)
-	os.Exit(1)
+	fmt.Println("debug:", version, ",len:", len(version))
 	if err != nil {
 		return nil, err
 	}
 
 	log.Info("Connected to L2OutputOracle", "address", cfg.L2OutputOracleAddr, "version", version)
+	os.Exit(1)
 
 	parsed, err := bindings.L2OutputOracleMetaData.GetAbi()
 	if err != nil {
