@@ -2,6 +2,7 @@ package sources
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -28,6 +29,7 @@ func (r *RollupClient) OutputAtBlock(ctx context.Context, blockNum uint64) (*eth
 
 func (r *RollupClient) SyncStatus(ctx context.Context) (*eth.SyncStatus, error) {
 	var output *eth.SyncStatus
+	fmt.Println("debug10")
 	err := r.rpc.CallContext(ctx, &output, "optimism_syncStatus")
 	return output, err
 }

@@ -329,9 +329,10 @@ func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.Outpu
 	// Fetch the current L2 heads
 	cCtx, cancel = context.WithTimeout(ctx, l.networkTimeout)
 	defer cancel()
+	fmt.Println("debug1:", err.Error())
 	status, err := l.rollupClient.SyncStatus(cCtx)
 	if err != nil {
-		fmt.Println("debug1:", err.Error())
+		fmt.Println("debug2:", err.Error())
 		l.log.Error("proposer unable to get sync status", "err", err)
 		return nil, false, err
 	}
