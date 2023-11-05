@@ -242,7 +242,6 @@ func getVersion(address common.Address) (string, error) {
 	if err != nil {
 		panic(err)
 	}
-	strconv.par
 	return string(version), nil
 }
 
