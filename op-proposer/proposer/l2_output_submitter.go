@@ -3,6 +3,7 @@ package proposer
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
@@ -221,7 +222,7 @@ func getVersion(address common.Address) (string, error) {
 	}
 	defer resp.Body.Close()
 	buffer := make([]byte, 512)
-	_, err = resp.Body.Read(buffer)
+	n, err = resp.Body.Read(buffer)
 	if err != nil {
 		panic(err)
 	}
@@ -229,10 +230,18 @@ func getVersion(address common.Address) (string, error) {
 		Result string `json:"result"`
 	}
 	var res JsonResp
-	fmt.Println("debug00:", res.Result)
-	version, err := hex.DecodeString(res.Result)
-	fmt.Println("debug0:", version)
-
+	buffer = buffer[:n-1]
+	err = json.Unmarshal(buffer, &res)
+	if err != nil {
+		panic(err)
+	}
+	tmpByte := []byte(res.Result)
+	tmpStr := string(tmpByte[2:])
+	tmpStr = fmt.Sprintf("%s", tmpStr)
+	version, err := hex.DecodeString(tmpStr)
+	if err != nil {
+		panic(err)
+	}
 	return string(version), nil
 }
 
