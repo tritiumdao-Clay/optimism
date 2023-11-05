@@ -61,7 +61,7 @@ func outputAtBlock(hexBlockNumber string, out *eth.OutputResponse) error {
 	return errors.New("tmp debug")
 }
 
-func sysncStatus(out *eth.SyncStatus) error {
+func sysncStatus(out **eth.SyncStatus) error {
 	prefixData := `{"jsonrpc":"2.0","id":1,"method":"optimism_syncStatus","params":[`
 	suffixData := `]}`
 	data := prefixData + suffixData
@@ -113,7 +113,11 @@ func sysncStatus(out *eth.SyncStatus) error {
 		return err
 	}
 
-	out = &res.Result
+	var tmpStatus = &eth.SyncStatus{}
+	*tmpStatus = res.Result
+	out = &tmpStatus
+
+	fmt.Println("debug15", (*out).SafeL2.Hash)
 	return nil
 }
 
@@ -125,13 +129,13 @@ func (r *RollupClient) OutputAtBlock(ctx context.Context, blockNum uint64) (*eth
 }
 
 func (r *RollupClient) SyncStatus(ctx context.Context) (*eth.SyncStatus, error) {
-	var output eth.SyncStatus
+	var output *eth.SyncStatus
 	fmt.Println("debug10")
 	err := sysncStatus(&output)
-	fmt.Println("debug11", output.SafeL2.Hash)
-	fmt.Println("debug11", output.SafeL2.Number)
+	fmt.Println("debug11", (*output).SafeL2.Hash)
+	fmt.Println("debug11", (*output).SafeL2.Number)
 	//err := r.rpc.CallContext(ctx, &output, "optimism_syncStatus")
-	return &output, err
+	return output, err
 }
 
 func (r *RollupClient) RollupConfig(ctx context.Context) (*rollup.Config, error) {
