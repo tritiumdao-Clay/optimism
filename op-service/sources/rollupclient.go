@@ -79,10 +79,26 @@ func sysncStatus(out **eth.SyncStatus) error {
 		return err
 	}
 	defer resp.Body.Close()
-	buffer := make([]byte, 4096)
-	n, err := resp.Body.Read(buffer)
-	if err != nil || n == 4096 {
-		fmt.Println("debug13", n)
+
+	buffer := make([]byte, 0)
+	var n int = 0
+	readBuffer := make([]byte, 512)
+	for {
+		nRead, errRead := resp.Body.Read(readBuffer)
+		if err != nil {
+			err = errRead
+			break
+		}
+		if nRead < 512 {
+			n += nRead
+			buffer = append(buffer, readBuffer...)
+			break
+		}
+		n += nRead
+		buffer = append(buffer, readBuffer...)
+	}
+	if err != nil {
+		fmt.Println("debug13", err.Error())
 		return err
 	}
 	type JsonResp struct {
