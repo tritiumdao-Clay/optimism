@@ -128,6 +128,8 @@ func (r *RollupClient) SyncStatus(ctx context.Context) (*eth.SyncStatus, error) 
 	var output eth.SyncStatus
 	fmt.Println("debug10")
 	err := sysncStatus(&output)
+	fmt.Println("debug11", output.SafeL2.Hash)
+	fmt.Println("debug11", output.SafeL2.Number)
 	//err := r.rpc.CallContext(ctx, &output, "optimism_syncStatus")
 	return &output, err
 }
