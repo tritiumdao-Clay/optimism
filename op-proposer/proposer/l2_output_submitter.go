@@ -246,7 +246,6 @@ func getVersion(address common.Address) (string, error) {
 		panic(err)
 	}
 	tmpStr = fmt.Sprintf("%s", version)
-	tmpStr = strings.TrimSpace(tmpStr)
 	return tmpStr, nil
 }
 
