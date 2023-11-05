@@ -214,7 +214,7 @@ func getVersion(address common.Address) (string, error) {
 	if err != nil {
 		panic(err)
 	}
-	req.Header.Set("Content-Type", "application/plain")
+	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
