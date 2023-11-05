@@ -338,6 +338,10 @@ func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.Outpu
 	}
 
 	// Use either the finalized or safe head depending on the config. Finalized head is default & safer.
+	fmt.Println("debug3:", status.SafeL2.Hash)
+	fmt.Println("debug3:", status.SafeL2.Number)
+	fmt.Println("debug3:", status.SafeL2.ParentHash)
+	fmt.Println("debug3:", status.SafeL2.L1Origin.Hash)
 	var currentBlockNumber *big.Int
 	if l.allowNonFinalized {
 		currentBlockNumber = new(big.Int).SetUint64(status.SafeL2.Number)

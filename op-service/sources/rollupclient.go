@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -116,20 +115,6 @@ func sysncStatus(out **eth.SyncStatus) error {
 
 	persistPointer := &res.Result
 	out = &persistPointer
-	fmt.Println("debugRes:", res.Result.CurrentL1)
-	fmt.Println("debugRes:", res.Result.CurrentL1.Hash)
-	fmt.Println("debugRes:", res.Result.CurrentL1.Number)
-	fmt.Println("debugRes:", res.Result.CurrentL1.ParentHash)
-	fmt.Println("debugRes:", res.Result.CurrentL1.Time)
-	fmt.Println("debug-----")
-	fmt.Println("debugRes:", res.Result.FinalizedL2.Hash)
-	fmt.Println("debugRes:", res.Result.FinalizedL2.Number)
-	fmt.Println("debugRes:", res.Result.FinalizedL2.ParentHash)
-	fmt.Println("debugRes:", res.Result.FinalizedL2.Time)
-	fmt.Println("debugRes:", res.Result.FinalizedL2.L1Origin.Hash)
-	fmt.Println("debugRes:", res.Result.FinalizedL2.L1Origin.Number)
-	fmt.Println("debugRes:", res.Result.FinalizedL2.SequenceNumber)
-	os.Exit(1)
 	return nil
 }
 
