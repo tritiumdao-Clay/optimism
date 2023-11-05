@@ -184,10 +184,10 @@ contract L2OutputOracle is Initializable, ISemver {
     {
         require(msg.sender == proposer, "L2OutputOracle: only the proposer address can propose new outputs");
 
-        require(
-            _l2BlockNumber == nextBlockNumber(),
-            "L2OutputOracle: block number must be equal to next expected block number"
-        );
+        //require(
+        //    _l2BlockNumber == nextBlockNumber(),
+        //    "L2OutputOracle: block number must be equal to next expected block number"
+        //);
 
         require(
             computeL2Timestamp(_l2BlockNumber) < block.timestamp,
@@ -205,10 +205,10 @@ contract L2OutputOracle is Initializable, ISemver {
             // retrievable, if the proposer is experiencing this attack it can simply leave out the
             // blockhash value, and delay submission until it is confident that the L1 block is
             // finalized.
-            require(
-                blockhash(_l1BlockNumber) == _l1BlockHash,
-                "L2OutputOracle: block hash does not match the hash at the expected height"
-            );
+            //require(
+            //    blockhash(_l1BlockNumber) == _l1BlockHash,
+            //    "L2OutputOracle: block hash does not match the hash at the expected height"
+            //);
         }
 
         emit OutputProposed(_outputRoot, nextOutputIndex(), _l2BlockNumber, block.timestamp);
