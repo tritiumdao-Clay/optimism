@@ -62,8 +62,8 @@ func outputAtBlock(hexBlockNumber string, out *eth.OutputResponse) error {
 }
 
 func sysncStatus(out **eth.SyncStatus) error {
-	prefixData := `{"jsonrpc":"2.0","id":1,"method":"optimism_syncStatus","params":["`
-	suffixData := `"]}`
+	prefixData := `{"jsonrpc":"2.0","id":1,"method":"optimism_syncStatus","params":[`
+	suffixData := `]}`
 	data := prefixData + suffixData
 	fmt.Println("debug-:", data)
 	body := strings.NewReader(data)
@@ -75,12 +75,14 @@ func sysncStatus(out **eth.SyncStatus) error {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
+		fmt.Println("debug12")
 		return err
 	}
 	defer resp.Body.Close()
 	buffer := make([]byte, 4096)
 	n, err := resp.Body.Read(buffer)
 	if err != nil || n == 4096 {
+		fmt.Println("debug13", n)
 		return err
 	}
 	type JsonResp struct {
@@ -90,6 +92,7 @@ func sysncStatus(out **eth.SyncStatus) error {
 	buffer = buffer[:n-1]
 	err = json.Unmarshal(buffer, &res)
 	if err != nil {
+		fmt.Println("debug14")
 		return err
 	}
 
