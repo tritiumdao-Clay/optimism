@@ -16,9 +16,9 @@
   chainId: 15557
   L1_RPC: https://api.testnet.evm.eosnetwork.com
 
-  L1StandardBridgeProxy address: 0x687E5591Cd5f1F48bE01886Ff9dE5012aD38C759
+  L1StandardBridgeProxy address: 0x217eF911feDc17aCAc2e3D637917797725857486
 
-  TestERC20:
+  TestERC20: 0x44e9668C3c73e3C7a46f59343a9FaBc739F1DaDb
   ```
 
 </details>
@@ -31,7 +31,7 @@
 
   L2StandardBridgeProxy address: 0x4200000000000000000000000000000000000010
 
-  L2TestERC20 address:
+  L2TestERC20 address: 0xfc276d7564c2330d473b52fcff6945f5a67f9145
   ```
   </details>
 
