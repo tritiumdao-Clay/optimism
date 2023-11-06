@@ -117,7 +117,6 @@ func sysncStatus(out **eth.SyncStatus) error {
 	*tmpStatus = res.Result
 	*out = tmpStatus
 
-	fmt.Println("debug15", (*out).SafeL2.Hash)
 	return nil
 }
 
@@ -130,13 +129,7 @@ func (r *RollupClient) OutputAtBlock(ctx context.Context, blockNum uint64) (*eth
 
 func (r *RollupClient) SyncStatus(ctx context.Context) (*eth.SyncStatus, error) {
 	var output *eth.SyncStatus
-	fmt.Println("debug10")
 	err := sysncStatus(&output)
-	if output == nil {
-		fmt.Println("debug11")
-	}
-	fmt.Println("debug12", output.SafeL2.Hash)
-	fmt.Println("debug13", output.SafeL2.Number)
 	//err := r.rpc.CallContext(ctx, &output, "optimism_syncStatus")
 	return output, err
 }
