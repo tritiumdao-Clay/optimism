@@ -228,13 +228,7 @@ contract OptimismPortal is Initializable, ResourceMetering, ISemver {
         external
         whenNotPaused
     {
-        require(_tx.target != address(this), "OptimismPortal: you cannot send messages to the portal contract");
-
         bytes32 outputRoot = l2Oracle.getL2Output(_l2OutputIndex).outputRoot;
-
-        require(
-            outputRoot == Hashing.hashOutputRootProof(_outputRootProof), "OptimismPortal: invalid output root proof"
-        );
 
         bytes32 withdrawalHash = Hashing.hashWithdrawal(_tx);
         ProvenWithdrawal memory provenWithdrawal = provenWithdrawals[withdrawalHash];
