@@ -344,8 +344,8 @@ func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.Outpu
 	fmt.Println("debug3:", status.SafeL2.L1Origin.Hash)
 	var currentBlockNumber *big.Int
 	if l.allowNonFinalized {
-		//currentBlockNumber = new(big.Int).SetUint64(status.SafeL2.Number)
-		currentBlockNumber = new(big.Int).SetUint64(status.UnsafeL2.Number)
+		currentBlockNumber = new(big.Int).SetUint64(status.SafeL2.Number)
+		//currentBlockNumber = new(big.Int).SetUint64(status.UnsafeL2.Number)
 	} else {
 		currentBlockNumber = new(big.Int).SetUint64(status.FinalizedL2.Number)
 	}
@@ -450,6 +450,13 @@ func (l *L2OutputSubmitter) sendTransaction(ctx context.Context, output *eth.Out
 		To:       &l.l2ooContractAddr,
 		GasLimit: 0,
 	})
+	fmt.Println("-------op-proposer publish tx--------------")
+	fmt.Println("", output.OutputRoot)
+	fmt.Println("", output.StateRoot.String())
+	fmt.Println("", common.Bytes2Hex(output.Version[:]))
+	fmt.Println("", output.WithdrawalStorageRoot.String())
+	fmt.Println("", output.BlockRef.Hash.String())
+	fmt.Println("-------op-proposer publish tx--------------")
 	if err != nil {
 		return err
 	}
