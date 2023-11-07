@@ -201,6 +201,92 @@ contract OptimismPortal is Initializable, ResourceMetering, ISemver {
         return systemConfig.resourceConfig();
     }
 
+    function proveWithdrawalTransactionDebug(
+        Types.WithdrawalTransaction memory _tx,
+        uint256 _l2OutputIndex,
+        Types.OutputRootProof calldata _outputRootProof,
+        bytes[] calldata _withdrawalProof
+    )
+        external
+        whenNotPaused
+    {
+        require(_tx.target != address(this), "OptimismPortal: you cannot send messages to the portal contract");
+
+        bytes32 outputRoot = l2Oracle.getL2Output(_l2OutputIndex).outputRoot;
+
+        require(
+            outputRoot == Hashing.hashOutputRootProof(_outputRootProof), "OptimismPortal: invalid output root proof"
+        );
+    }
+
+    function proveWithdrawalTransactionDebug2(
+        Types.WithdrawalTransaction memory _tx,
+        uint256 _l2OutputIndex,
+        Types.OutputRootProof calldata _outputRootProof,
+        bytes[] calldata _withdrawalProof
+    )
+        external
+        whenNotPaused
+    {
+        require(_tx.target != address(this), "OptimismPortal: you cannot send messages to the portal contract");
+
+        bytes32 outputRoot = l2Oracle.getL2Output(_l2OutputIndex).outputRoot;
+
+        require(
+            outputRoot == Hashing.hashOutputRootProof(_outputRootProof), "OptimismPortal: invalid output root proof"
+        );
+
+        bytes32 withdrawalHash = Hashing.hashWithdrawal(_tx);
+        ProvenWithdrawal memory provenWithdrawal = provenWithdrawals[withdrawalHash];
+
+        require(
+            provenWithdrawal.timestamp == 0
+                || l2Oracle.getL2Output(provenWithdrawal.l2OutputIndex).outputRoot != provenWithdrawal.outputRoot,
+            "OptimismPortal: withdrawal hash has already been proven"
+        );
+
+    }
+    function proveWithdrawalTransactionDebug3(
+        Types.WithdrawalTransaction memory _tx,
+        uint256 _l2OutputIndex,
+        Types.OutputRootProof calldata _outputRootProof,
+        bytes[] calldata _withdrawalProof
+    )
+        external
+        whenNotPaused
+    {
+        require(_tx.target != address(this), "OptimismPortal: you cannot send messages to the portal contract");
+
+        bytes32 outputRoot = l2Oracle.getL2Output(_l2OutputIndex).outputRoot;
+
+        require(
+            outputRoot == Hashing.hashOutputRootProof(_outputRootProof), "OptimismPortal: invalid output root proof"
+        );
+
+        bytes32 withdrawalHash = Hashing.hashWithdrawal(_tx);
+        ProvenWithdrawal memory provenWithdrawal = provenWithdrawals[withdrawalHash];
+
+        require(
+            provenWithdrawal.timestamp == 0
+                || l2Oracle.getL2Output(provenWithdrawal.l2OutputIndex).outputRoot != provenWithdrawal.outputRoot,
+            "OptimismPortal: withdrawal hash has already been proven"
+        );
+
+        bytes32 storageKey = keccak256(
+            abi.encode(
+                withdrawalHash,
+                uint256(0) // The withdrawals mapping is at the first slot in the layout.
+            )
+        );
+
+        require(
+            SecureMerkleTrie.verifyInclusionProof(
+                abi.encode(storageKey), hex"01", _withdrawalProof, _outputRootProof.messagePasserStorageRoot
+            ),
+            "OptimismPortal: invalid withdrawal inclusion proof"
+        );
+    }
+
     /// @notice Proves a withdrawal transaction.
     /// @param _tx              Withdrawal transaction to finalize.
     /// @param _l2OutputIndex   L2 output index to prove against.
