@@ -451,11 +451,11 @@ func (l *L2OutputSubmitter) sendTransaction(ctx context.Context, output *eth.Out
 		GasLimit: 0,
 	})
 	fmt.Println("-------op-proposer publish tx--------------")
-	fmt.Println("", output.OutputRoot)
-	fmt.Println("", output.StateRoot.String())
-	fmt.Println("", common.Bytes2Hex(output.Version[:]))
-	fmt.Println("", output.WithdrawalStorageRoot.String())
-	fmt.Println("", output.BlockRef.Hash.String())
+	fmt.Println("outputRoot:", output.OutputRoot)
+	fmt.Println("stateRoot:", output.StateRoot.String())
+	fmt.Println("version:", common.Bytes2Hex(output.Version[:]))
+	fmt.Println("storageRoot:", output.WithdrawalStorageRoot.String())
+	fmt.Println("blockHash:", output.BlockRef.Hash.String())
 	fmt.Println("-------op-proposer publish tx--------------")
 	if err != nil {
 		return err
