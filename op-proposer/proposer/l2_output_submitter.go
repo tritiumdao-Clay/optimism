@@ -344,8 +344,8 @@ func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.Outpu
 	fmt.Println("debug3:", status.SafeL2.L1Origin.Hash)
 	var currentBlockNumber *big.Int
 	if l.allowNonFinalized {
-		currentBlockNumber = new(big.Int).SetUint64(status.SafeL2.Number)
-		//currentBlockNumber = new(big.Int).SetUint64(status.UnsafeL2.Number)
+		//currentBlockNumber = new(big.Int).SetUint64(status.SafeL2.Number)
+		currentBlockNumber = new(big.Int).SetUint64(status.UnsafeL2.Number)
 	} else {
 		currentBlockNumber = new(big.Int).SetUint64(status.FinalizedL2.Number)
 	}
@@ -456,6 +456,17 @@ func (l *L2OutputSubmitter) sendTransaction(ctx context.Context, output *eth.Out
 	fmt.Println("version:", common.Bytes2Hex(output.Version[:]))
 	fmt.Println("storageRoot:", output.WithdrawalStorageRoot.String())
 	fmt.Println("blockHash:", output.BlockRef.Hash.String())
+	{
+		var tmpByte [32]byte
+		copy(tmpByte[:], output.WithdrawalStorageRoot.Bytes())
+		l2Output := eth.OutputV0{
+			StateRoot:                eth.Bytes32(output.StateRoot),
+			MessagePasserStorageRoot: tmpByte,
+			BlockHash:                output.BlockRef.Hash,
+		}
+		calculateRoot := eth.OutputRoot(&l2Output)
+		fmt.Println("calcuRoot:", calculateRoot.String())
+	}
 	fmt.Println("-------op-proposer publish tx--------------")
 	if err != nil {
 		return err
