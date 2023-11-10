@@ -16,9 +16,11 @@
   chainId: 15557
   L1_RPC: https://api.testnet.evm.eosnetwork.com
 
-  L1StandardBridgeProxy address: 0x217eF911feDc17aCAc2e3D637917797725857486
+  L1StandardBridgeProxy address: 0x44332FC3Bf2a38e742DeF9d6cf20bd2ca4a3a9A8
 
-  TestERC20: 0x44e9668C3c73e3C7a46f59343a9FaBc739F1DaDb
+  OptimismPortalProxy address : 0xdd52D429c7c85d2122EbEB3C5808fbf73caBe927
+
+  TestERC20: 0x2475009a64a6846d02661611dc34C20A95eaBdFC
   ```
 
 </details>
@@ -27,11 +29,11 @@
 - <details><summary>L2(opEOS)</summary>
 
   ```js
-  chainId: 42069
+  chainId: 4556
 
   L2StandardBridgeProxy address: 0x4200000000000000000000000000000000000010
 
-  L2TestERC20 address: 0xfc276d7564c2330d473b52fcff6945f5a67f9145
+  L2TestERC20 address: 0xb60bfc844edb68251e5ff04d5d1081ed294a0a6b
   ```
   </details>
 
@@ -80,14 +82,51 @@
 
   </details>
 
-- <details><summary class="green">finalize: 用户再L1链Claim提现交易</summary>
+- <details><summary class="green">prove: L1链Claim提现交易(caller: OptimismPortalProxy)</summary>
 
-  //todo
   ```javascript
-  function finalize(
-  );
+  struct WithdrawalTransaction {
+        uint256 nonce;
+        address sender;
+        address target;
+        uint256 value;
+        uint256 gasLimit;
+        bytes data;
+  }
+
+  struct OutputRootProof {
+        bytes32 version;
+        bytes32 stateRoot;
+        bytes32 messagePasserStorageRoot;
+        bytes32 latestBlockhash;
+  }
+
+  function proveWithdrawalTransaction(
+      Types.WithdrawalTransaction memory _tx,
+      uint256 _l2OutputIndex,
+      Types.OutputRootProof calldata _outputRootProof,
+      bytes[] calldata _withdrawalProof
+  )
+  ```
+
+  </details>
+
+- <details><summary class="green">finalize: L1链Claim提现交易(caller: OptimismPortalProxy)</summary>
+
+  ```javascript
+  struct WithdrawalTransaction {
+        uint256 nonce;
+        address sender;
+        address target;
+        uint256 value;
+        uint256 gasLimit;
+        bytes data;
+  }
+
+  function finalizeWithdrawalTransaction(
+    Types.WithdrawalTransaction memory _tx
+  )
   ```
 
   </details>
 </details>
-
