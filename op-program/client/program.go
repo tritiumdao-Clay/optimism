@@ -78,7 +78,6 @@ func runDerivation(logger log.Logger, cfg *rollup.Config, l2Cfg *params.ChainCon
 		} else if err != nil {
 			return err
 		}
-		fmt.Println("debugD6")
 	}
 	return d.ValidateClaim(eth.Bytes32(l2Claim))
 }

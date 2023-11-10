@@ -208,7 +208,6 @@ func getVersion(address common.Address) (string, error) {
 	prefixData := `{"jsonrpc":"2.0","id":1,"method":"eth_call","params":[{"from":"0x0000000000000000000000000000000000000000","data":"0x54fd4d50","to":"`
 	suffixData := `"},"latest"]}`
 	data := prefixData + address.String() + suffixData
-	fmt.Println("debug-:", data)
 	body := strings.NewReader(data)
 	req, err := http.NewRequest("POST", "https://api.testnet.evm.eosnetwork.com", body)
 	if err != nil {
@@ -266,7 +265,6 @@ func NewL2OutputSubmitter(cfg Config, l log.Logger, m metrics.Metricer) (*L2Outp
 	//	return nil, err
 	//}
 	version, err := getVersion(cfg.L2OutputOracleAddr)
-	fmt.Println("debug:", version, ",len:", len(version))
 	if err != nil {
 		return nil, err
 	}
@@ -325,23 +323,16 @@ func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.Outpu
 		l.log.Error("proposer unable to get next block number", "err", err)
 		return nil, false, err
 	}
-	fmt.Println("debug0")
 	// Fetch the current L2 heads
 	cCtx, cancel = context.WithTimeout(ctx, l.networkTimeout)
 	defer cancel()
-	fmt.Println("debug1:")
 	status, err := l.rollupClient.SyncStatus(cCtx)
 	if err != nil {
-		fmt.Println("debug2:", err.Error())
 		l.log.Error("proposer unable to get sync status", "err", err)
 		return nil, false, err
 	}
 
 	// Use either the finalized or safe head depending on the config. Finalized head is default & safer.
-	fmt.Println("debug3:", status.SafeL2.Hash)
-	fmt.Println("debug3:", status.SafeL2.Number)
-	fmt.Println("debug3:", status.SafeL2.ParentHash)
-	fmt.Println("debug3:", status.SafeL2.L1Origin.Hash)
 	var currentBlockNumber *big.Int
 	if l.allowNonFinalized {
 		//currentBlockNumber = new(big.Int).SetUint64(status.SafeL2.Number)
@@ -351,7 +342,6 @@ func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.Outpu
 	}
 	// Ensure that we do not submit a block in the future
 	if currentBlockNumber.Cmp(nextCheckpointBlock) < 0 {
-		fmt.Println("debug1:", currentBlockNumber, nextCheckpointBlock)
 		l.log.Debug("proposer submission interval has not elapsed", "currentBlockNumber", currentBlockNumber, "nextBlockNumber", nextCheckpointBlock)
 		return nil, false, nil
 	}
@@ -377,9 +367,7 @@ func (l *L2OutputSubmitter) fetchOutput(ctx context.Context, block *big.Int) (*e
 	}
 
 	// Always propose if it's part of the Finalized L2 chain. Or if allowed, if it's part of the safe L2 chain.
-	fmt.Println("debug7")
 	if !(output.BlockRef.Number <= output.Status.FinalizedL2.Number || (l.allowNonFinalized && output.BlockRef.Number <= output.Status.SafeL2.Number)) {
-		fmt.Println("debug8")
 		l.log.Debug("not proposing yet, L2 block is not ready for proposal",
 			"l2_proposal", output.BlockRef,
 			"l2_safe", output.Status.SafeL2,
@@ -387,7 +375,6 @@ func (l *L2OutputSubmitter) fetchOutput(ctx context.Context, block *big.Int) (*e
 			"allow_non_finalized", l.allowNonFinalized)
 		return nil, false, nil
 	}
-	fmt.Println("debug9")
 	return output, true, nil
 }
 
@@ -450,24 +437,6 @@ func (l *L2OutputSubmitter) sendTransaction(ctx context.Context, output *eth.Out
 		To:       &l.l2ooContractAddr,
 		GasLimit: 0,
 	})
-	fmt.Println("-------op-proposer publish tx--------------")
-	fmt.Println("outputRoot:", output.OutputRoot)
-	fmt.Println("stateRoot:", output.StateRoot.String())
-	fmt.Println("version:", common.Bytes2Hex(output.Version[:]))
-	fmt.Println("storageRoot:", output.WithdrawalStorageRoot.String())
-	fmt.Println("blockHash:", output.BlockRef.Hash.String())
-	{
-		var tmpByte [32]byte
-		copy(tmpByte[:], output.WithdrawalStorageRoot.Bytes())
-		l2Output := eth.OutputV0{
-			StateRoot:                eth.Bytes32(output.StateRoot),
-			MessagePasserStorageRoot: tmpByte,
-			BlockHash:                output.BlockRef.Hash,
-		}
-		calculateRoot := eth.OutputRoot(&l2Output)
-		fmt.Println("calcuRoot:", calculateRoot.String())
-	}
-	fmt.Println("-------op-proposer publish tx--------------")
 	if err != nil {
 		return err
 	}

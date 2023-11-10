@@ -33,7 +33,6 @@ func UserDeposits(receipts []*types.Receipt, depositContractAddr common.Address)
 }
 
 func DeriveDeposits(receipts []*types.Receipt, depositContractAddr common.Address) ([]hexutil.Bytes, error) {
-	fmt.Println("debugdebug")
 	var result error
 	userDeposits, err := UserDeposits(receipts, depositContractAddr)
 	if err != nil {

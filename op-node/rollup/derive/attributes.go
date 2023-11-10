@@ -3,8 +3,6 @@ package derive
 import (
 	"context"
 	"fmt"
-	"reflect"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -49,7 +47,6 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 	var depositTxs []hexutil.Bytes
 	var seqNumber uint64
 
-	fmt.Println("debugB0")
 	sysConfig, err := ba.l2.SystemConfigByL2Hash(ctx, l2Parent.Hash)
 	if err != nil {
 		return nil, NewTemporaryError(fmt.Errorf("failed to retrieve L2 parent block: %w", err))
@@ -58,29 +55,22 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 	// If the L1 origin changed this block, then we are in the first block of the epoch. In this
 	// case we need to fetch all transaction receipts from the L1 origin block so we can scan for
 	// user deposits.
-	fmt.Println("debugB1", l2Parent.L1Origin.Number, epoch.Number)
 	if l2Parent.L1Origin.Number != epoch.Number {
-		fmt.Println("debugB2: ", reflect.TypeOf(ba.l1), epoch.Hash)
 		info, receipts, err := ba.l1.FetchReceipts(ctx, epoch.Hash)
-		fmt.Println("debugB3", len(receipts))
 		if err != nil {
 			return nil, NewTemporaryError(fmt.Errorf("failed to fetch L1 block info and receipts: %w", err))
 		}
-		fmt.Println("debugB4")
 		if l2Parent.L1Origin.Hash != info.ParentHash() {
 			return nil, NewResetError(
 				fmt.Errorf("cannot create new block with L1 origin %s (parent %s) on top of L1 origin %s",
 					epoch, info.ParentHash(), l2Parent.L1Origin))
 		}
 
-		fmt.Println("debugB5")
 		deposits, err := DeriveDeposits(receipts, ba.cfg.DepositContractAddress)
 		if err != nil {
 			// deposits may never be ignored. Failing to process them is a critical error.
-			fmt.Println("debugB6")
 			return nil, NewCriticalError(fmt.Errorf("failed to derive some deposits: %w", err))
 		}
-		fmt.Println("debugB7-----", len(deposits))
 		// apply sysCfg changes
 		if err := UpdateSystemConfigWithL1Receipts(&sysConfig, receipts, ba.cfg); err != nil {
 			return nil, NewCriticalError(fmt.Errorf("failed to apply derived L1 sysCfg updates: %w", err))
@@ -112,13 +102,6 @@ func (ba *FetchingAttributesBuilder) PreparePayloadAttributes(ctx context.Contex
 	l1InfoTx, err := L1InfoDepositBytes(seqNumber, l1Info, sysConfig, ba.cfg.IsRegolith(nextL2Time))
 	if err != nil {
 		return nil, NewCriticalError(fmt.Errorf("failed to create l1InfoTx: %w", err))
-	}
-
-	fmt.Println("debugB8", len(depositTxs), l1Info.Hash(), l1Info.NumberU64())
-	{
-		for i, item := range depositTxs {
-			fmt.Println("debugF8, ", i, item.String())
-		}
 	}
 
 	txs := make([]hexutil.Bytes, 0, 1+len(depositTxs))

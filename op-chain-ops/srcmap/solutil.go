@@ -232,11 +232,8 @@ func (s *SourceMapTracer) CaptureState(pc uint64, op vm.OpCode, gas, cost uint64
 
 func (s *SourceMapTracer) CaptureFault(pc uint64, op vm.OpCode, gas, cost uint64, scope *vm.ScopeContext, depth int, err error) {
 	fmt.Fprintf(s.out, "%-40s: pc %x opcode %s FAULT %v\n", s.info(scope.Contract.CodeAddr, pc), pc, op.String(), err)
-	fmt.Println("----")
 	fmt.Fprintf(s.out, "calldata: %x\n", scope.Contract.Input)
-	fmt.Println("----")
 	fmt.Fprintf(s.out, "memory: %x\n", scope.Memory.Data())
-	fmt.Println("----")
 	fmt.Fprintf(s.out, "stack:\n")
 	stack := scope.Stack.Data()
 	for i := range stack {

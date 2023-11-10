@@ -486,7 +486,6 @@ func (job *receiptsFetchingJob) runAltMethod(ctx context.Context, m ReceiptsFetc
 // The job caches the result, so repeated Fetches add no additional cost.
 // Fetch is safe to be called concurrently, and will lock to avoid duplicate work or internal inconsistency.
 func (job *receiptsFetchingJob) Fetch(ctx context.Context) (types.Receipts, error) {
-	fmt.Println("debugFetch")
 	job.m.Lock()
 	defer job.m.Unlock()
 

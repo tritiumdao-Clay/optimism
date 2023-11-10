@@ -207,17 +207,13 @@ func (dp *DerivationPipeline) Step(ctx context.Context) error {
 
 	// Now step the engine queue. It will pull earlier data as needed.
 	if err := dp.eng.Step(ctx); err == io.EOF {
-		fmt.Println("debugD3---")
 		// If every stage has returned io.EOF, try to advance the L1 Origin
 		return dp.traversal.AdvanceL1Block(ctx)
 	} else if errors.Is(err, EngineP2PSyncing) {
-		fmt.Println("debugD3a")
 		return err
 	} else if err != nil {
-		fmt.Println("debugD3b: ", err.Error())
 		return fmt.Errorf("engine stage failed: %w", err)
 	} else {
-		fmt.Println("debugD3c")
 		return nil
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -29,7 +28,6 @@ func outputAtBlock(hexBlockNumber string, out *eth.OutputResponse) error {
 	prefixData := `{"jsonrpc":"2.0","id":1,"method":"optimism_outputAtBlock","params":["`
 	suffixData := `"]}`
 	data := prefixData + hexBlockNumber + suffixData
-	fmt.Println("debug-:", data)
 	body := strings.NewReader(data)
 	req, err := http.NewRequest("POST", "http://127.0.0.1:8547", body)
 	if err != nil {
@@ -57,7 +55,6 @@ func outputAtBlock(hexBlockNumber string, out *eth.OutputResponse) error {
 		return err
 	}
 
-	fmt.Println("debugRes:", res.Result)
 	return errors.New("tmp debug")
 }
 
@@ -65,7 +62,6 @@ func sysncStatus(out **eth.SyncStatus) error {
 	prefixData := `{"jsonrpc":"2.0","id":1,"method":"optimism_syncStatus","params":[`
 	suffixData := `]}`
 	data := prefixData + suffixData
-	fmt.Println("debug-:", data)
 	body := strings.NewReader(data)
 	req, err := http.NewRequest("POST", "http://127.0.0.1:8547", body)
 	if err != nil {
@@ -75,7 +71,6 @@ func sysncStatus(out **eth.SyncStatus) error {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Println("debug12")
 		return err
 	}
 	defer resp.Body.Close()
@@ -98,7 +93,6 @@ func sysncStatus(out **eth.SyncStatus) error {
 		buffer = append(buffer, readBuffer...)
 	}
 	if err != nil {
-		fmt.Println("debug13", err.Error())
 		return err
 	}
 	type JsonResp struct {
@@ -106,10 +100,8 @@ func sysncStatus(out **eth.SyncStatus) error {
 	}
 	var res JsonResp
 	buffer = buffer[:n-1]
-	fmt.Println("debug", string(buffer))
 	err = json.Unmarshal(buffer, &res)
 	if err != nil {
-		fmt.Println("debug14")
 		return err
 	}
 

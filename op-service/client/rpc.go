@@ -166,7 +166,6 @@ func (b *BaseRPCClient) Close() {
 func (b *BaseRPCClient) CallContext(ctx context.Context, result any, method string, args ...any) error {
 	cCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
-	fmt.Println("debugBaseRPCClient", method, args)
 	return b.c.CallContext(cCtx, result, method, args...)
 }
 
