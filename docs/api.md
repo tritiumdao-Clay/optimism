@@ -26,7 +26,7 @@
 </details>
 
 
-- <details><summary>L2(opEOStest)</summary>
+- <details><summary>L2(opeostest)</summary>
 
   ```js
   chainId: 4556
