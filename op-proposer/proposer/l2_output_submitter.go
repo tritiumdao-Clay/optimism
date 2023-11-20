@@ -338,7 +338,7 @@ func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.Outpu
 
 	// Use either the finalized or safe head depending on the config. Finalized head is default & safer.
 	var currentBlockNumber *big.Int
-	fmt.Println("debug4")
+	fmt.Println("debug4", status)
 	if l.allowNonFinalized {
 		//currentBlockNumber = new(big.Int).SetUint64(status.SafeL2.Number)
 		currentBlockNumber = new(big.Int).SetUint64(status.UnsafeL2.Number)
@@ -351,6 +351,7 @@ func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.Outpu
 		l.log.Debug("proposer submission interval has not elapsed", "currentBlockNumber", currentBlockNumber, "nextBlockNumber", nextCheckpointBlock)
 		return nil, false, nil
 	}
+	fmt.Println("debug6")
 
 	return l.fetchOutput(ctx, nextCheckpointBlock)
 }
