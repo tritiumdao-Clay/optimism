@@ -334,9 +334,11 @@ func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.Outpu
 		l.log.Error("proposer unable to get sync status", "err", err)
 		return nil, false, err
 	}
+	fmt.Println("debug3")
 
 	// Use either the finalized or safe head depending on the config. Finalized head is default & safer.
 	var currentBlockNumber *big.Int
+	fmt.Println("debug4")
 	if l.allowNonFinalized {
 		//currentBlockNumber = new(big.Int).SetUint64(status.SafeL2.Number)
 		currentBlockNumber = new(big.Int).SetUint64(status.UnsafeL2.Number)
@@ -344,6 +346,7 @@ func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.Outpu
 		currentBlockNumber = new(big.Int).SetUint64(status.FinalizedL2.Number)
 	}
 	// Ensure that we do not submit a block in the future
+	fmt.Println("debug5", currentBlockNumber, nextCheckpointBlock)
 	if currentBlockNumber.Cmp(nextCheckpointBlock) < 0 {
 		l.log.Debug("proposer submission interval has not elapsed", "currentBlockNumber", currentBlockNumber, "nextBlockNumber", nextCheckpointBlock)
 		return nil, false, nil
