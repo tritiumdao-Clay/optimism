@@ -312,17 +312,20 @@ func (l *L2OutputSubmitter) Stop() {
 // FetchNextOutputInfo gets the block number of the next proposal.
 // It returns: the next block number, if the proposal should be made, error
 func (l *L2OutputSubmitter) FetchNextOutputInfo(ctx context.Context) (*eth.OutputResponse, bool, error) {
+	fmt.Println("debug0")
 	cCtx, cancel := context.WithTimeout(ctx, l.networkTimeout)
 	defer cancel()
 	callOpts := &bind.CallOpts{
 		From:    l.txMgr.From(),
 		Context: cCtx,
 	}
+	fmt.Println("debug1")
 	nextCheckpointBlock, err := l.l2ooContract.NextBlockNumber(callOpts)
 	if err != nil {
 		l.log.Error("proposer unable to get next block number", "err", err)
 		return nil, false, err
 	}
+	fmt.Println("debug2", nextCheckpointBlock.String())
 	// Fetch the current L2 heads
 	cCtx, cancel = context.WithTimeout(ctx, l.networkTimeout)
 	defer cancel()
@@ -406,6 +409,7 @@ func (l *L2OutputSubmitter) waitForL1Head(ctx context.Context, blockNum uint64) 
 	if err != nil {
 		return err
 	}
+	fmt.Println("debug20")
 	for l1head <= blockNum {
 		l.log.Debug("waiting for l1 head > l1blocknum1+1", "l1head", l1head, "l1blocknum", blockNum)
 		select {
@@ -419,11 +423,13 @@ func (l *L2OutputSubmitter) waitForL1Head(ctx context.Context, blockNum uint64) 
 			return fmt.Errorf("L2OutputSubmitter is done()")
 		}
 	}
+	fmt.Println("debug21")
 	return nil
 }
 
 // sendTransaction creates & sends transactions through the underlying transaction manager.
 func (l *L2OutputSubmitter) sendTransaction(ctx context.Context, output *eth.OutputResponse) error {
+	fmt.Println("debug30")
 	err := l.waitForL1Head(ctx, output.Status.HeadL1.Number+1)
 	if err != nil {
 		return err
