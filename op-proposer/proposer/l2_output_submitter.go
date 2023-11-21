@@ -379,15 +379,15 @@ func (l *L2OutputSubmitter) fetchOutput(ctx context.Context, block *big.Int) (*e
 
 	// Always propose if it's part of the Finalized L2 chain. Or if allowed, if it's part of the safe L2 chain.
 	fmt.Println("debug8", output.BlockRef.Number, output.Status.FinalizedL2.Number, output.Status.SafeL2.Number)
-	if !(output.BlockRef.Number <= output.Status.FinalizedL2.Number || (l.allowNonFinalized && output.BlockRef.Number <= output.Status.SafeL2.Number)) {
-		fmt.Println("debug9")
-		l.log.Debug("not proposing yet, L2 block is not ready for proposal",
-			"l2_proposal", output.BlockRef,
-			"l2_safe", output.Status.SafeL2,
-			"l2_finalized", output.Status.FinalizedL2,
-			"allow_non_finalized", l.allowNonFinalized)
-		return nil, false, nil
-	}
+	//if !(output.BlockRef.Number <= output.Status.FinalizedL2.Number || (l.allowNonFinalized && output.BlockRef.Number <= output.Status.SafeL2.Number)) {
+	//	fmt.Println("debug9")
+	//	l.log.Debug("not proposing yet, L2 block is not ready for proposal",
+	//		"l2_proposal", output.BlockRef,
+	//		"l2_safe", output.Status.SafeL2,
+	//		"l2_finalized", output.Status.FinalizedL2,
+	//		"allow_non_finalized", l.allowNonFinalized)
+	//	return nil, false, nil
+	//}
 	fmt.Println("debugA")
 	return output, true, nil
 }
